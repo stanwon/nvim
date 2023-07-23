@@ -275,3 +275,27 @@ vim.api.nvim_create_autocmd({"FileType"}, {
     ]]
   end
 })
+
+vim.api.nvim_create_autocmd({"FileType"}, {
+  pattern = "markdown",
+  callback = function()
+    vim.opt.shiftwidth = 2
+    vim.opt.tabstop = 2
+    vim.opt.softtabstop = 2
+    local m = { noremap = true, nowait = true }
+    vim.keymap.set("i", ";n", "<esc>/<++<cr>:noh<cr>cf>", m)
+    vim.keymap.set("i", ";1", "# ", m)
+    vim.keymap.set("i", ";2", "## ", m)
+    vim.keymap.set("i", ";3", "### ", m)
+    vim.keymap.set("i", ";4", "#### ", m)
+    vim.keymap.set("i", ";5", "##### ", m)
+    vim.keymap.set("i", ";6", "###### ", m)
+    vim.keymap.set("i", ";b", "****<++++><esc>F*hi", m)
+    vim.keymap.set("i", ";I", "**<++++><esc>F*i", m)
+    vim.keymap.set("i", ";c", "``````<++++><esc>F`2hi", m)
+    vim.keymap.set("i", ";C", "``<++++><esc>F`i", m)
+    vim.keymap.set("i", ";i", "![](<++image-path++>)<esc>F]i", m)
+    vim.keymap.set("i", ";u", "[](<++url++>)<esc>F]i", m)
+    vim.keymap.set("i", ";t", "- [ ] ", m)
+  end
+})
