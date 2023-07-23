@@ -27,6 +27,40 @@ vim.o.autochdir = true
 vim.o.list = true
 vim.o.listchars = "tab:> ,trail:▫"
 
+local telescope = {
+  "nvim-telescope/telescope.nvim",
+  dependencies = {
+    "nvim-lua/plenary.nvim",
+    "LukasPietzschmann/telescope-tabs",
+    "FeiyouG/command_center.nvim",
+  },
+  config = function()
+    local m = { noremap = true, nowait = true }
+    local builtin = require("telescope.builtin")
+    local ts = require("telescope")
+    ts.setup({
+      defaults = {
+        mappings = {
+          i = {
+            ["<c-k>"] = "move_selection_previous",
+            ["<c-j>"] = "move_selection_next",
+            ["<c-h>"] = "preview_scrolling_up",
+            ["<c-l>"] = "preview_scrolling_down",
+            ["<esc>"] = "close",
+          },
+        },
+        color_devicons = true,
+        prompt_prefix = "🔍 ",
+        selection_caret = " ",
+      },
+    })
+    vim.keymap.set("n", "<leader>ff", builtin.find_files, m)
+    vim.keymap.set("n", "<leader>fb", builtin.buffers, m)
+    ts.load_extension("telescope-tabs")
+    ts.load_extension("command_center")
+  end,
+}
+
 local deus = {
   "theniceboy/nvim-deus",
   lazy = false,
@@ -38,4 +72,5 @@ local deus = {
 
 require("lazy").setup({
   deus,
+  telescope,
 })
