@@ -27,6 +27,23 @@ vim.o.autochdir = true
 vim.o.list = true
 vim.o.listchars = "tab:> ,trail:▫"
 vim.o.clipboard = "unnamedplus"
+vim.o.scrolloff = 7
+
+local surround = {
+  "kylechui/nvim-surround",
+  version = "*", -- Use for stability; omit to use `main` branch for the latest features
+  event = "VeryLazy",
+  config = function()
+    require("nvim-surround").setup({
+      -- Configuration here, or leave empty to use defaults
+    })
+  end
+}
+
+local codeAction = {
+  "weilbith/nvim-code-action-menu",
+  cmd = "CodeActionMenu",
+}
 
 local lsp = {
   "neovim/nvim-lspconfig",
@@ -143,8 +160,7 @@ local mason = {
 
 local lualine = {
   "nvim-lualine/lualine.nvim",
-  dependencies = 
-  {
+  dependencies = {
     "nvim-tree/nvim-web-devicons",
   },
   config = function()
@@ -253,15 +269,6 @@ local deus = {
   end,
 }
 
-require("lazy").setup({
-  deus,
-  telescope,
-  comment,
-  lualine,
-  mason,
-  lsp,
-})
-
 -- save cursor position
 vim.api.nvim_create_autocmd({"BufReadPost"}, {
   pattern = "*",
@@ -305,4 +312,15 @@ vim.api.nvim_create_autocmd({"FileType"}, {
     vim.keymap.set("i", ";u", "[](<++url++>)<esc>F]i", m)
     vim.keymap.set("i", ";t", "- [ ] ", m)
   end
+})
+
+require("lazy").setup({
+  deus,
+  telescope,
+  comment,
+  lualine,
+  mason,
+  lsp,
+  codeAction,
+  surround,
 })
