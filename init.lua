@@ -82,8 +82,10 @@ local treesitter = {
     local configs = require("nvim-treesitter.configs")
     configs.setup({
       ensure_installed = { "lua", "go" },
-      sync_install = false,
-      highlight = { enable = true },
+      highlight = {
+        enable = true,
+        use_languagetree = true,
+      },
       indent = { enable = false },
     })
   end,
@@ -192,7 +194,15 @@ local lsp = {
           Lua = {
             diagnostics = {
               globals = { 'vim' }
-            }
+            },
+            workspace = {
+              library = {
+                [vim.fn.expand "$VIMRUNTIME/lua"] = true,
+                [vim.fn.expand "$VIMRUNTIME/lua/vim/lsp"] = true,
+              },
+              maxPreload = 100000,
+              preloadFileSize = 10000,
+           }
           }
         }
       })
@@ -381,6 +391,7 @@ vim.api.nvim_create_autocmd({"FileType"}, {
 })
 
 require("lazy").setup({
+  treesitter,
   deus,
   telescope,
   comment,
@@ -390,7 +401,6 @@ require("lazy").setup({
   codeAction,
   surround,
   autopairs,
-  treesitter,
   nvimtree,
   bufferline,
 })
