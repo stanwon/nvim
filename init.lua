@@ -52,14 +52,14 @@ local lsp = {
       window = {
         completion = {
           border = {
-            { "╭", hl_name },
-            { "─", hl_name },
-            { "╮", hl_name },
-            { "│", hl_name },
-            { "╯", hl_name },
-            { "─", hl_name },
-            { "╰", hl_name },
-            { "│", hl_name },
+            { "╭", "CmpBorder" },
+            { "─", "CmpBorder" },
+            { "╮", "CmpBorder" },
+            { "│", "CmpBorder" },
+            { "╯", "CmpBorder" },
+            { "─", "CmpBorder" },
+            { "╰", "CmpBorder" },
+            { "│", "CmpBorder" },
           },
         },
       },
@@ -104,7 +104,14 @@ local lsp = {
     local servers = { "lua_ls", "gopls" }
     for _, lsp in ipairs(servers) do
       lspconfig[lsp].setup({
-        capabilities = capabilities 
+        capabilities = capabilities,
+        settings = {
+          Lua = {
+            diagnostics = {
+              globals = { 'vim' }
+            }
+          }
+        }
       })
     end
   end
