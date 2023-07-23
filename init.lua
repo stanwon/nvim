@@ -26,6 +26,7 @@ vim.o.wrap = true
 vim.o.autochdir = true
 vim.o.list = true
 vim.o.listchars = "tab:> ,trail:▫"
+vim.o.clipboard = "unnamedplus"
 
 local lsp = {
   "neovim/nvim-lspconfig",
