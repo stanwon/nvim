@@ -29,6 +29,12 @@ vim.o.listchars = "tab:> ,trail:▫"
 vim.o.clipboard = "unnamedplus"
 vim.o.scrolloff = 7
 
+local autopairs = {
+  'windwp/nvim-autopairs',
+  event = "InsertEnter",
+  opts = {} -- this is equalent to setup({}) function
+}
+
 local surround = {
   "kylechui/nvim-surround",
   version = "*", -- Use for stability; omit to use `main` branch for the latest features
@@ -323,4 +329,5 @@ require("lazy").setup({
   lsp,
   codeAction,
   surround,
+  autopairs,
 })
