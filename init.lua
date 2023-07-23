@@ -49,6 +49,20 @@ local lsp = {
           vim.fn["vsnip#anonymous"](args.body)
         end
       },
+      window = {
+        completion = {
+          border = {
+            { "╭", hl_name },
+            { "─", hl_name },
+            { "╮", hl_name },
+            { "│", hl_name },
+            { "╯", hl_name },
+            { "─", hl_name },
+            { "╰", hl_name },
+            { "│", hl_name },
+          },
+        },
+      },
       sources = cmp.config.sources({
         { name = "nvim_lsp" },
         { name = "vsnip" },
