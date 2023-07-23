@@ -27,6 +27,74 @@ vim.o.autochdir = true
 vim.o.list = true
 vim.o.listchars = "tab:> ,trail:▫"
 
+local lsp = {
+  "neovim/nvim-lspconfig",
+  dependencies = {
+    "hrsh7th/nvim-cmp",
+    "hrsh7th/cmp-nvim-lsp",
+    "hrsh7th/cmp-buffer",
+    "hrsh7th/cmp-path",
+    "hrsh7th/cmp-cmdline",
+    "hrsh7th/cmp-vsnip",
+    "hrsh7th/vim-vsnip",
+  },
+  config = function()
+    -- cmp
+    local cmp = require("cmp")
+    cmp.setup({
+      enabled = true,
+      snippet = {
+        expand = function(args)
+          vim.fn["vsnip#anonymous"](args.body)
+        end
+      },
+      sources = cmp.config.sources({
+        { name = "nvim_lsp" },
+        { name = "vsnip" },
+      }, {
+        { name = "buffer" },
+      }),
+      mapping = {
+        ['<C-e>'] = cmp.mapping.abort(),
+        ["<CR>"] = cmp.mapping({
+          i = function(fallback)
+            if cmp.visible() and cmp.get_active_entry() then
+              cmp.confirm({ behavior = cmp.ConfirmBehavior.Replace, select = false })
+            else
+              fallback()
+            end
+          end,
+          s = cmp.mapping.confirm({ select = true }),
+          c = cmp.mapping.confirm({ behavior = cmp.ConfirmBehavior.Replace, select = true }),
+        }),
+        ["<Tab>"] = cmp.mapping(function(fallback)
+          if cmp.visible() then
+            cmp.select_next_item()
+          else
+            fallback() -- The fallback function sends a already mapped key. In this case, it's probably `<Tab>`.
+          end
+        end, { "i", "s" }),
+
+        ["<S-Tab>"] = cmp.mapping(function()
+          if cmp.visible() then
+            cmp.select_prev_item()
+          end
+        end, { "i", "s" }),
+      }
+    })
+
+    -- lspconfig
+    local capabilities = require("cmp_nvim_lsp").default_capabilities()
+    local lspconfig = require("lspconfig")
+    local servers = { "lua_ls", "gopls" }
+    for _, lsp in ipairs(servers) do
+      lspconfig[lsp].setup({
+        capabilities = capabilities 
+      })
+    end
+  end
+}
+
 local mason = {
   "williamboman/mason.nvim",
   build = ":MasonUpdate",
@@ -169,6 +237,7 @@ require("lazy").setup({
   comment,
   lualine,
   mason,
+  lsp,
 })
 
 -- save cursor position
