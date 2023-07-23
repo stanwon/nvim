@@ -29,6 +29,34 @@ vim.o.listchars = "tab:> ,trail:▫"
 vim.o.clipboard = "unnamedplus"
 vim.o.scrolloff = 7
 
+local bufferline = {
+  "akinsho/bufferline.nvim",
+  version = "*",
+  opts = {
+    options = {
+      mode = "tabs",
+      diagnostics = "nvim_lsp",
+      -- diagnostics_indicator = function(count, level, diagnostics_dict, context)
+      diagnostics_indicator = function(count, level)
+        local icon = level:match("error") and " " or " "
+        return " " .. icon .. count
+      end,
+      indicator = {
+        icon = '▎', -- this should be omitted if indicator style is not 'icon'
+        -- style = 'icon' | 'underline' | 'none',
+        style = "icon",
+      },
+      show_buffer_close_icons = false,
+      show_close_icon = false,
+      enforce_regular_tabs = true,
+      show_duplicate_prefix = false,
+      tab_size = 16,
+      padding = 0,
+      separator_style = "thick",
+    }
+  }
+}
+
 local nvimtree = {
   "nvim-tree/nvim-tree.lua",
   config = function ()
@@ -364,4 +392,5 @@ require("lazy").setup({
   autopairs,
   treesitter,
   nvimtree,
+  bufferline,
 })
