@@ -170,3 +170,24 @@ require("lazy").setup({
   lualine,
   mason,
 })
+
+-- save cursor position
+vim.api.nvim_create_autocmd({"BufReadPost"}, {
+  pattern = "*",
+  callback = function()
+    vim.cmd[[
+    if @% !~# '\.git[\/\\]COMMIT_EDITMSG$' && line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g`\"" | endif
+    ]]
+  end
+})
+
+-- splite help vertically
+vim.api.nvim_create_autocmd({"FileType"}, {
+  pattern = "help",
+  callback = function()
+    vim.cmd[[
+    wincmd L
+    vertical resize +15
+    ]]
+  end
+})
