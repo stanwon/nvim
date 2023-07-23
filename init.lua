@@ -27,6 +27,30 @@ vim.o.autochdir = true
 vim.o.list = true
 vim.o.listchars = "tab:> ,trail:▫"
 
+local mason = {
+  "williamboman/mason.nvim",
+  build = ":MasonUpdate",
+  lazy = false,
+  dependencies = {
+    "williamboman/mason-lspconfig.nvim",
+  },
+  config = function()
+    require("mason").setup({
+      ui = {
+        icons = {
+          package_installed = "✓",
+          package_pending = "➜",
+          package_uninstalled = "✗"
+        }
+      }
+    })
+    require("mason-lspconfig").setup({
+      ensure_installed = { "lua_ls", "gopls" },
+      automatic_installation = true,
+    })
+  end,
+}
+
 local lualine = {
   "nvim-lualine/lualine.nvim",
   dependencies = 
@@ -144,4 +168,5 @@ require("lazy").setup({
   telescope,
   comment,
   lualine,
+  mason,
 })
