@@ -29,6 +29,24 @@ vim.o.listchars = "tab:> ,trail:▫"
 vim.o.clipboard = "unnamedplus"
 vim.o.scrolloff = 7
 
+local nvimtree = {
+  "nvim-tree/nvim-tree.lua",
+  config = function ()
+    require("nvim-tree").setup({
+      sort_by = "case_sensitive",
+      view = {
+        width = 30,
+      },
+      renderer = {
+        group_empty = true,
+      },
+      filters = {
+        dotfiles = true,
+      },
+    })
+  end
+}
+
 local treesitter = {
   "nvim-treesitter/nvim-treesitter",
   build = ":TSUpdate",
@@ -345,4 +363,5 @@ require("lazy").setup({
   surround,
   autopairs,
   treesitter,
+  nvimtree,
 })
