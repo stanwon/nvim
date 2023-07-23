@@ -27,5 +27,15 @@ vim.o.autochdir = true
 vim.o.list = true
 vim.o.listchars = "tab:> ,trail:▫"
 
-require("lazy").setup({})
+local deus = {
+  "theniceboy/nvim-deus",
+  lazy = false,
+  priority = 1000,
+  config = function()
+    vim.cmd[[colorscheme deus]]
+  end,
+}
 
+require("lazy").setup({
+  deus,
+})
