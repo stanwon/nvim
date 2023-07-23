@@ -27,6 +27,71 @@ vim.o.autochdir = true
 vim.o.list = true
 vim.o.listchars = "tab:> ,trail:▫"
 
+local lualine = {
+  "nvim-lualine/lualine.nvim",
+  config = function()
+	  require("lualine").setup{
+      options = {
+        icons_enabled = true,
+        theme = 'auto',
+        component_separators = { left = '', right = ''},
+        section_separators = { left = '', right = ''},
+        disabled_filetypes = {
+          statusline = {},
+          winbar = {},
+        },
+        ignore_focus = {},
+        always_divide_middle = true,
+        globalstatus = false,
+        refresh = {
+          statusline = 1000,
+          tabline = 1000,
+          winbar = 1000,
+        }
+      },
+      sections = {
+        lualine_a = {'mode'},
+        lualine_b = {'branch', 'diff', 'diagnostics'},
+        lualine_c = {'filename'},
+        lualine_x = {'encoding', 'fileformat', 'filetype'},
+        lualine_y = {'progress'},
+        lualine_z = {'location'}
+      },
+      inactive_sections = {
+        lualine_a = {},
+        lualine_b = {},
+        lualine_c = {'filename'},
+        lualine_x = {'location'},
+        lualine_y = {},
+        lualine_z = {}
+      },
+      tabline = {},
+      winbar = {},
+      inactive_winbar = {},
+      extensions = {}
+    }
+  end
+}
+
+local comment = {
+  "numToStr/Comment.nvim",
+  config = function()
+    local api = require("Comment.api")
+    require("Comment").setup({
+      padding = true,
+      stickly = true,
+      mappings = {
+        basic = false,
+        extra = false,
+      },
+    })
+    vim.keymap.set("n", "<leader>/", function()
+      api.toggle.linewise.current()
+    end)
+    vim.keymap.set("v", "<leader>/", "<esc><cmd>lua require('Comment.api').toggle.linewise(vim.fn.visualmode())<cr>")
+  end
+}
+
 local telescope = {
   "nvim-telescope/telescope.nvim",
   dependencies = {
@@ -70,27 +135,9 @@ local deus = {
   end,
 }
 
-local comment = {
-  "numToStr/Comment.nvim",
-  config = function()
-    local api = require("Comment.api")
-    require("Comment").setup({
-      padding = true,
-      stickly = true,
-      mappings = {
-        basic = false,
-        extra = false,
-      },
-    })
-    vim.keymap.set("n", "<leader>/", function()
-      api.toggle.linewise.current()
-    end)
-    vim.keymap.set("v", "<leader>/", "<esc><cmd>lua require('Comment.api').toggle.linewise(vim.fn.visualmode())<cr>")
-  end
-}
-
 require("lazy").setup({
   deus,
   telescope,
   comment,
+  lualine,
 })
