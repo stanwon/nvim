@@ -29,6 +29,20 @@ vim.o.listchars = "tab:> ,trail:▫"
 vim.o.clipboard = "unnamedplus"
 vim.o.scrolloff = 7
 
+local treesitter = {
+  "nvim-treesitter/nvim-treesitter",
+  build = ":TSUpdate",
+  config = function ()
+    local configs = require("nvim-treesitter.configs")
+    configs.setup({
+      ensure_installed = { "lua", "go" },
+      sync_install = false,
+      highlight = { enable = true },
+      indent = { enable = false },
+    })
+  end,
+}
+
 local autopairs = {
   'windwp/nvim-autopairs',
   event = "InsertEnter",
@@ -330,4 +344,5 @@ require("lazy").setup({
   codeAction,
   surround,
   autopairs,
+  treesitter,
 })
