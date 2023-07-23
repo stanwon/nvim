@@ -1,4 +1,5 @@
 {
+  "Comment.nvim": { "branch": "master", "commit": "176e85eeb63f1a5970d6b88f1725039d85ca0055" },
   "command_center.nvim": { "branch": "main", "commit": "0d820c438c871fe31ed942bc592a070da1564141" },
   "lazy.nvim": { "branch": "main", "commit": "3ad55ae678876516156cca2f361c51f7952a924b" },
   "nvim-deus": { "branch": "master", "commit": "e2f5d84c52c52577f122330bf471a834d6bf0c93" },

@@ -70,7 +70,27 @@ local deus = {
   end,
 }
 
+local comment = {
+  "numToStr/Comment.nvim",
+  config = function()
+    local api = require("Comment.api")
+    require("Comment").setup({
+      padding = true,
+      stickly = true,
+      mappings = {
+        basic = false,
+        extra = false,
+      },
+    })
+    vim.keymap.set("n", "<leader>/", function()
+      api.toggle.linewise.current()
+    end)
+    vim.keymap.set("v", "<leader>/", "<esc><cmd>lua require('Comment.api').toggle.linewise(vim.fn.visualmode())<cr>")
+  end
+}
+
 require("lazy").setup({
   deus,
   telescope,
+  comment,
 })
