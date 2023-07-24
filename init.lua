@@ -29,6 +29,45 @@ vim.o.listchars = "tab:> ,trail:▫"
 vim.o.clipboard = "unnamedplus"
 vim.o.scrolloff = 7
 
+local nvterm = {
+  "NvChad/nvterm",
+  config = function ()
+    local m = { noremap = true, nowait = true }
+    vim.keymap.set("n", "<leader>h", function ()
+      require("nvterm.terminal").toggle "horizontal"
+    end, m)
+    vim.keymap.set("n", "<leader>v", function ()
+      require("nvterm.terminal").toggle "vertical"
+    end, m)
+    require("nvterm").setup({
+      terminals = {
+        shell = vim.o.shell,
+        list = {},
+        type_opts = {
+          float = {
+            relative = 'editor',
+            row = 0.3,
+            col = 0.25,
+            width = 0.5,
+            height = 0.4,
+            border = "single",
+          },
+          horizontal = { location = "rightbelow", split_ratio = .3, },
+          vertical = { location = "rightbelow", split_ratio = .5 },
+        }
+      },
+      behavior = {
+        autoclose_on_quit = {
+          enabled = false,
+          confirm = true,
+        },
+        close_on_exit = true,
+        auto_insert = true,
+      },
+    })
+  end,
+}
+
 local bufferline = {
   "akinsho/bufferline.nvim",
   version = "*",
@@ -404,4 +443,5 @@ require("lazy").setup({
   autopairs,
   nvimtree,
   bufferline,
+  nvterm;
 })
