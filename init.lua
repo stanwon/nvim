@@ -430,6 +430,10 @@ vim.api.nvim_create_autocmd({"FileType"}, {
   end
 })
 
+local m = { noremap = true, nowait = true }
+vim.keymap.set("n", "<esc>", ":nohlsearch<cr>", m)
+vim.keymap.set("n", "<c-s>", "*N", m)
+
 require("lazy").setup({
   treesitter,
   deus,
