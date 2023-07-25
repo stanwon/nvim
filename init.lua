@@ -408,6 +408,7 @@ vim.api.nvim_create_autocmd({"FileType"}, {
 vim.api.nvim_create_autocmd({"FileType"}, {
   pattern = "markdown",
   callback = function()
+    vim.o.linebreak = true
     vim.o.spell = true
     vim.o.shiftwidth = 2
     vim.o.tabstop = 2
