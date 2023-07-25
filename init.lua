@@ -329,15 +329,17 @@ local comment = {
     require("Comment").setup({
       padding = true,
       stickly = true,
+      toggler = {
+        line = "<leader>/",
+      },
+      opleader = {
+        block = "<leader>/",
+      },
       mappings = {
-        basic = false,
+        basic = true,
         extra = false,
       },
     })
-    vim.keymap.set("n", "<leader>/", function()
-      api.toggle.linewise.current()
-    end)
-    vim.keymap.set("v", "<leader>/", "<esc><cmd>lua require('Comment.api').toggle.linewise(vim.fn.visualmode())<cr>")
   end
 }
 
