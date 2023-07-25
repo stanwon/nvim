@@ -28,7 +28,43 @@ vim.o.list = true
 vim.o.listchars = "tab:> ,trail:▫"
 vim.o.clipboard = "unnamedplus"
 vim.o.scrolloff = 7
+
 local m = { noremap = true }
+
+local wilder = {
+  'gelguy/wilder.nvim',
+  config = function()
+    local wilder = require('wilder')
+    wilder.setup {
+      modes = { ':' },
+      next_key = '<Tab>',
+      previous_key = '<S-Tab>',
+    }
+    wilder.set_option('renderer', wilder.popupmenu_renderer(
+      wilder.popupmenu_palette_theme({
+        highlights = {
+          border = 'Normal', -- highlight to use for the border
+        },
+        left = { ' ', wilder.popupmenu_devicons() },
+        right = { ' ', wilder.popupmenu_scrollbar() },
+        border = 'rounded',
+        max_height = '75%',      -- max height of the palette
+        min_height = 0,          -- set to the same as 'max_height' for a fixed height window
+        prompt_position = 'top', -- 'top' or 'bottom' to set the location of the prompt
+        reverse = 0,             -- set to 1 to reverse the order of the list, use in combination with 'prompt_position'
+      })
+    ))
+    wilder.set_option('pipeline', {
+      wilder.branch(
+        wilder.cmdline_pipeline({
+          language = 'vim',
+          fuzzy = 1,
+        }), wilder.search_pipeline()
+      ),
+    })
+  end
+}
+
 local fzf = {
   "ibhagwan/fzf-lua",
   keys = { "<c-f>" },
@@ -498,22 +534,24 @@ local telescope = {
       defaults = {
         mappings = {
           i = {
-            ["<C-h>"] = "which_key",
+            -- ["<C-h>"] = "which_key",
             ["<c-k>"] = "move_selection_previous",
             ["<c-j>"] = "move_selection_next",
             ["<c-h>"] = "preview_scrolling_up",
             ["<c-l>"] = "preview_scrolling_down",
-            ["<esc>"] = "close",
+            -- ["<esc>"] = "close",
           },
         },
+        initial_mode = "normal",
         color_devicons = true,
-        prompt_prefix = "🔍 ",
+        prompt_prefix = "🔍",
         selection_caret = " ",
+        path_display = { "truncate" },
         pickers = {
           buffers = {
             show_all_buffers = true,
             sort_lastused = true,
-          }
+          },
         }
       },
       extensions = {
@@ -530,8 +568,12 @@ local telescope = {
     ts.load_extension("command_palette")
     ts.load_extension("command_center")
     ts.load_extension('fzf')
-    vim.keymap.set("n", "<leader>ff", builtin.find_files, m)
-    vim.keymap.set("n", "<leader>;", builtin.commands, m)
+    vim.keymap.set("n", "<leader>ff", function()
+      builtin.find_files({ hidden = true, layout_config = { prompt_position = "top" } })
+    end, m)
+    vim.keymap.set("n", "<leader>;", function()
+      builtin.commands(require("telescope.themes").get_dropdown { previewer = true })
+    end, m)
     vim.keymap.set("n", "<leader>fb", builtin.buffers, m)
   end,
 }
@@ -611,5 +653,6 @@ require("lazy").setup({
   nvimtree,
   bufferline,
   nvterm,
-  fzf
+  fzf,
+  wilder,
 })
