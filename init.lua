@@ -28,15 +28,117 @@ vim.o.list = true
 vim.o.listchars = "tab:> ,trail:▫"
 vim.o.clipboard = "unnamedplus"
 vim.o.scrolloff = 7
+local m = { noremap = true }
+local fzf = {
+  "ibhagwan/fzf-lua",
+  keys = { "<c-f>" },
+  config = function()
+    local fzf = require('fzf-lua')
+    vim.keymap.set('n', '<c-f>', function()
+      -- fzf.live_grep_resume({ multiprocess = true, debug = true })
+      fzf.grep({ search = "", fzf_opts = { ['--layout'] = 'default' } })
+    end, m)
+    vim.keymap.set('x', '<c-f>', function()
+      -- fzf.live_grep_resume({ multiprocess = true, debug = true })
+      fzf.grep_visual({ fzf_opts = { ['--layout'] = 'default' } })
+    end, m)
+    fzf.setup({
+      global_resume = true,
+      global_resume_query = true,
+      winopts = {
+        height     = 1,
+        width      = 1,
+        preview    = {
+          layout = 'vertical',
+          scrollbar = 'float',
+        },
+        fullscreen = true,
+        vertical   = 'down:45%', -- up|down:size
+        horizontal = 'right:60%', -- right|left:size
+        hidden     = 'nohidden',
+      },
+      keymap = {
+        builtin = {
+          ["<c-f>"]    = "toggle-fullscreen",
+          ["<c-r>"]    = "toggle-preview-wrap",
+          ["<c-p>"]    = "toggle-preview",
+          ["<c-y>"]    = "preview-page-down",
+          ["<c-l>"]    = "preview-page-up",
+          ["<S-left>"] = "preview-page-reset",
+        },
+        fzf = {
+          ["esc"]        = "abort",
+          ["ctrl-h"]     = "unix-line-discard",
+          ["ctrl-k"]     = "half-page-down",
+          ["ctrl-b"]     = "half-page-up",
+          ["ctrl-n"]     = "beginning-of-line",
+          ["ctrl-a"]     = "end-of-line",
+          ["alt-a"]      = "toggle-all",
+          ["f3"]         = "toggle-preview-wrap",
+          ["f4"]         = "toggle-preview",
+          ["shift-down"] = "preview-page-down",
+          ["shift-up"]   = "preview-page-up",
+          ["ctrl-e"]     = "down",
+          ["ctrl-u"]     = "up",
+        },
+      },
+      previewers = {
+        head = {
+          cmd  = "head",
+          args = nil,
+        },
+        git_diff = {
+          cmd_deleted   = "git diff --color HEAD --",
+          cmd_modified  = "git diff --color HEAD",
+          cmd_untracked = "git diff --color --no-index /dev/null",
+          -- pager        = "delta",      -- if you have `delta` installed
+        },
+        man = {
+          cmd = "man -c %s | col -bx",
+        },
+        builtin = {
+          syntax         = true,   -- preview syntax highlight?
+          syntax_limit_l = 0,      -- syntax limit (lines), 0=nolimit
+          syntax_limit_b = 1024 * 1024, -- syntax limit (bytes), 0=nolimit
+        },
+      },
+      files = {
+        -- previewer      = "bat",          -- uncomment to override previewer
+        -- (name from 'previewers' table)
+        -- set to 'false' to disable
+        prompt       = 'Files❯ ',
+        multiprocess = true, -- run command in a separate process
+        git_icons    = true, -- show git icons?
+        file_icons   = true, -- show file icons?
+        color_icons  = true, -- colorize file|git icons
+        -- executed command priority is 'cmd' (if exists)
+        -- otherwise auto-detect prioritizes `fd`:`rg`:`find`
+        -- default options are controlled by 'fd|rg|find|_opts'
+        -- NOTE: 'find -printf' requires GNU find
+        -- cmd            = "find . -type f -printf '%P\n'",
+        find_opts    = [[-type f -not -path '*/\.git/*' -printf '%P\n']],
+        rg_opts      = "--color=never --files --hidden --follow -g '!.git'",
+        fd_opts      = "--color=never --type f --hidden --follow --exclude .git",
+      },
+      buffers = {
+        prompt        = 'Buffers❯ ',
+        file_icons    = true, -- show file icons?
+        color_icons   = true, -- colorize file|git icons
+        sort_lastused = true, -- sort buffers() by last used
+      },
+    })
+  end
+
+}
 
 local nvterm = {
   "NvChad/nvterm",
-  config = function ()
+  config = function()
     local m = { noremap = true, nowait = true }
-    vim.keymap.set("n", "<leader>h", function ()
+    vim.keymap.set("n", "<leader>h", function()
       require("nvterm.terminal").toggle "horizontal"
     end, m)
-    vim.keymap.set("n", "<leader>v", function ()
+    vim.keymap.set("n", "<leader>v", function()
       require("nvterm.terminal").toggle "vertical"
     end, m)
     require("nvterm").setup({
@@ -98,7 +200,7 @@ local bufferline = {
 
 local nvimtree = {
   "nvim-tree/nvim-tree.lua",
-  config = function ()
+  config = function()
     require("nvim-tree").setup({
       sort_by = "case_sensitive",
       view = {
@@ -117,7 +219,7 @@ local nvimtree = {
 local treesitter = {
   "nvim-treesitter/nvim-treesitter",
   build = ":TSUpdate",
-  config = function ()
+  config = function()
     local configs = require("nvim-treesitter.configs")
     configs.setup({
       ensure_installed = { "lua", "go" },
@@ -195,16 +297,14 @@ local lsp = {
       }),
       mapping = {
         ['<C-e>'] = cmp.mapping.abort(),
-        ["<CR>"] = cmp.mapping({
+        ['<CR>'] = cmp.mapping({
           i = function(fallback)
             if cmp.visible() and cmp.get_active_entry() then
               cmp.confirm({ behavior = cmp.ConfirmBehavior.Replace, select = false })
             else
               fallback()
             end
-          end,
-          s = cmp.mapping.confirm({ select = true }),
-          c = cmp.mapping.confirm({ behavior = cmp.ConfirmBehavior.Replace, select = true }),
+          end
         }),
         ["<Tab>"] = cmp.mapping(function(fallback)
           if cmp.visible() then
@@ -241,7 +341,7 @@ local lsp = {
               },
               maxPreload = 100000,
               preloadFileSize = 10000,
-           }
+            }
           }
         }
       })
@@ -279,12 +379,12 @@ local lualine = {
     "nvim-tree/nvim-web-devicons",
   },
   config = function()
-	  require("lualine").setup{
+    require("lualine").setup {
       options = {
         icons_enabled = true,
         theme = 'auto',
-        component_separators = { left = '', right = ''},
-        section_separators = { left = '', right = ''},
+        component_separators = { left = '', right = '' },
+        section_separators = { left = '', right = '' },
         disabled_filetypes = {
           statusline = {},
           winbar = {},
@@ -299,18 +399,18 @@ local lualine = {
         }
       },
       sections = {
-        lualine_a = {'mode'},
-        lualine_b = {'branch', 'diff', 'diagnostics'},
-        lualine_c = {'filename'},
-        lualine_x = {'encoding', 'fileformat', 'filetype'},
-        lualine_y = {'progress'},
-        lualine_z = {'location'}
+        lualine_a = { 'mode' },
+        lualine_b = { 'branch', 'diff', 'diagnostics' },
+        lualine_c = { 'filename' },
+        lualine_x = { 'encoding', 'fileformat', 'filetype' },
+        lualine_y = { 'progress' },
+        lualine_z = { 'location' }
       },
       inactive_sections = {
         lualine_a = {},
         lualine_b = {},
-        lualine_c = {'filename'},
-        lualine_x = {'location'},
+        lualine_c = { 'filename' },
+        lualine_x = { 'location' },
         lualine_y = {},
         lualine_z = {}
       },
@@ -342,6 +442,46 @@ local comment = {
   end
 }
 
+local palette = {
+  { "File",
+    { "entire selection (C-a)",  ':call feedkeys("GVgg")' },
+    { "save current file (C-s)", ':w' },
+    { "save all files (C-A-s)",  ':wa' },
+    { "quit (C-q)",              ':qa' },
+    { "file browser (C-i)",      ":lua require'telescope'.extensions.file_browser.file_browser()", 1 },
+    { "search word (A-w)",       ":lua require('telescope.builtin').live_grep()",                  1 },
+    { "git files (A-f)",         ":lua require('telescope.builtin').git_files()",                  1 },
+    { "files (C-f)",             ":lua require('telescope.builtin').find_files()",                 1 },
+  },
+  { "Help",
+    { "tips",            ":help tips" },
+    { "cheatsheet",      ":help index" },
+    { "tutorial",        ":help tutor" },
+    { "summary",         ":help summary" },
+    { "quick reference", ":help quickref" },
+    { "search help(F1)", ":lua require('telescope.builtin').help_tags()", 1 },
+  },
+  { "Vim",
+    { "reload vimrc",              ":source $MYVIMRC" },
+    { 'check health',              ":checkhealth" },
+    { "jumps (Alt-j)",             ":lua require('telescope.builtin').jumplist()" },
+    { "commands",                  ":lua require('telescope.builtin').commands()" },
+    { "command history",           ":lua require('telescope.builtin').command_history()" },
+    { "registers (A-e)",           ":lua require('telescope.builtin').registers()" },
+    { "colorshceme",               ":lua require('telescope.builtin').colorscheme()",    1 },
+    { "vim options",               ":lua require('telescope.builtin').vim_options()" },
+    { "keymaps",                   ":lua require('telescope.builtin').keymaps()" },
+    { "buffers",                   ":Telescope buffers" },
+    { "search history (C-h)",      ":lua require('telescope.builtin').search_history()" },
+    { "paste mode",                ':set paste!' },
+    { 'cursor line',               ':set cursorline!' },
+    { 'cursor column',             ':set cursorcolumn!' },
+    { "spell checker",             ':set spell!' },
+    { "relative number",           ':set relativenumber!' },
+    { "search highlighting (F12)", ':set hlsearch!' },
+  }
+}
+
 local telescope = {
   "nvim-telescope/telescope.nvim",
   dependencies = {
@@ -351,7 +491,7 @@ local telescope = {
     "LinArcX/telescope-command-palette.nvim"
   },
   config = function()
-    local m = { noremap = true, nowait = true }
+    -- local m = { noremap = true, nowait = true }
     local builtin = require("telescope.builtin")
     local ts = require("telescope")
     ts.setup({
@@ -368,55 +508,23 @@ local telescope = {
         color_devicons = true,
         prompt_prefix = "🔍 ",
         selection_caret = " ",
-      },
-      --[[ extensions = {
-        command_palette = {
-          {"File",
-            { "entire selection (C-a)", ':call feedkeys("GVgg")' },
-            { "save current file (C-s)", ':w' },
-            { "save all files (C-A-s)", ':wa' },
-            { "quit (C-q)", ':qa' },
-            { "file browser (C-i)", ":lua require'telescope'.extensions.file_browser.file_browser()", 1 },
-            { "search word (A-w)", ":lua require('telescope.builtin').live_grep()", 1 },
-            { "git files (A-f)", ":lua require('telescope.builtin').git_files()", 1 },
-            { "files (C-f)",     ":lua require('telescope.builtin').find_files()", 1 },
-          },
-          {"Help",
-            { "tips", ":help tips" },
-            { "cheatsheet", ":help index" },
-            { "tutorial", ":help tutor" },
-            { "summary", ":help summary" },
-            { "quick reference", ":help quickref" },
-            { "search help(F1)", ":lua require('telescope.builtin').help_tags()", 1 },
-          },
-          {"Vim",
-            { "reload vimrc", ":source $MYVIMRC" },
-            { 'check health', ":checkhealth" },
-            { "jumps (Alt-j)", ":lua require('telescope.builtin').jumplist()" },
-            { "commands", ":lua require('telescope.builtin').commands()" },
-            { "command history", ":lua require('telescope.builtin').command_history()" },
-            { "registers (A-e)", ":lua require('telescope.builtin').registers()" },
-            { "colorshceme", ":lua require('telescope.builtin').colorscheme()", 1 },
-            { "vim options", ":lua require('telescope.builtin').vim_options()" },
-            { "keymaps", ":lua require('telescope.builtin').keymaps()" },
-            { "buffers", ":Telescope buffers" },
-            { "search history (C-h)", ":lua require('telescope.builtin').search_history()" },
-            { "paste mode", ':set paste!' },
-            { 'cursor line', ':set cursorline!' },
-            { 'cursor column', ':set cursorcolumn!' },
-            { "spell checker", ':set spell!' },
-            { "relative number", ':set relativenumber!' },
-            { "search highlighting (F12)", ':set hlsearch!' },
+        pickers = {
+          buffers = {
+            show_all_buffers = true,
+            sort_lastused = true,
           }
         }
-      } ]]
+      },
+      extensions = {
+        command_palette = palette
+      },
     })
+    ts.load_extension("telescope-tabs")
+    ts.load_extension("command_palette")
+    ts.load_extension("command_center")
     vim.keymap.set("n", "<leader>ff", builtin.find_files, m)
     vim.keymap.set("n", "<leader>;", builtin.commands, m)
     vim.keymap.set("n", "<leader>fb", builtin.buffers, m)
-    ts.load_extension("telescope-tabs")
-    ts.load_extension("command_center")
-    -- ts.load_extension("command_palette")
   end,
 }
 
@@ -425,32 +533,32 @@ local deus = {
   lazy = false,
   priority = 1000,
   config = function()
-    vim.cmd[[colorscheme deus]]
+    vim.cmd [[colorscheme deus]]
   end,
 }
 
 -- save cursor position
-vim.api.nvim_create_autocmd({"BufReadPost"}, {
+vim.api.nvim_create_autocmd({ "BufReadPost" }, {
   pattern = "*",
   callback = function()
-    vim.cmd[[
+    vim.cmd [[
     if @% !~# '\.git[\/\\]COMMIT_EDITMSG$' && line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g`\"" | endif
     ]]
   end
 })
 
 -- splite help vertically
-vim.api.nvim_create_autocmd({"FileType"}, {
+vim.api.nvim_create_autocmd({ "FileType" }, {
   pattern = "help",
   callback = function()
-    vim.cmd[[
+    vim.cmd [[
     wincmd L
     vertical resize +15
     ]]
   end
 })
 
-vim.api.nvim_create_autocmd({"FileType"}, {
+vim.api.nvim_create_autocmd({ "FileType" }, {
   pattern = "markdown",
   callback = function()
     vim.o.linebreak = true
@@ -479,6 +587,9 @@ vim.api.nvim_create_autocmd({"FileType"}, {
 local m = { noremap = true, nowait = true }
 vim.keymap.set("n", "<esc>", ":nohlsearch<cr>", m)
 vim.keymap.set("n", "<c-s>", "*N", m)
+vim.keymap.set("n", "<leader>fm", function()
+  vim.lsp.buf.format { async = true }
+end, m)
 
 require("lazy").setup({
   treesitter,
@@ -493,5 +604,6 @@ require("lazy").setup({
   autopairs,
   nvimtree,
   bufferline,
-  nvterm;
+  nvterm,
+  fzf
 })
