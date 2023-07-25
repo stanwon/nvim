@@ -53,7 +53,7 @@ local fzf = {
           scrollbar = 'float',
         },
         fullscreen = true,
-        vertical   = 'down:45%', -- up|down:size
+        vertical   = 'down:45%',  -- up|down:size
         horizontal = 'right:60%', -- right|left:size
         hidden     = 'nohidden',
       },
@@ -97,8 +97,8 @@ local fzf = {
           cmd = "man -c %s | col -bx",
         },
         builtin = {
-          syntax         = true,   -- preview syntax highlight?
-          syntax_limit_l = 0,      -- syntax limit (lines), 0=nolimit
+          syntax         = true,        -- preview syntax highlight?
+          syntax_limit_l = 0,           -- syntax limit (lines), 0=nolimit
           syntax_limit_b = 1024 * 1024, -- syntax limit (bytes), 0=nolimit
         },
       },
@@ -134,7 +134,6 @@ local fzf = {
 local nvterm = {
   "NvChad/nvterm",
   config = function()
-    local m = { noremap = true, nowait = true }
     vim.keymap.set("n", "<leader>h", function()
       require("nvterm.terminal").toggle "horizontal"
     end, m)
@@ -488,7 +487,8 @@ local telescope = {
     "nvim-lua/plenary.nvim",
     "LukasPietzschmann/telescope-tabs",
     "FeiyouG/command_center.nvim",
-    "LinArcX/telescope-command-palette.nvim"
+    "LinArcX/telescope-command-palette.nvim",
+    { 'nvim-telescope/telescope-fzf-native.nvim', build = 'make' },
   },
   config = function()
     -- local m = { noremap = true, nowait = true }
@@ -498,6 +498,7 @@ local telescope = {
       defaults = {
         mappings = {
           i = {
+            ["<C-h>"] = "which_key",
             ["<c-k>"] = "move_selection_previous",
             ["<c-j>"] = "move_selection_next",
             ["<c-h>"] = "preview_scrolling_up",
@@ -516,12 +517,19 @@ local telescope = {
         }
       },
       extensions = {
-        command_palette = palette
+        command_palette = palette,
+        fzf = {
+          fuzzy = true,
+          override_generic_sorter = true,
+          override_file_sorter = true,
+          case_mode = "smart_case",
+        },
       },
     })
     ts.load_extension("telescope-tabs")
     ts.load_extension("command_palette")
     ts.load_extension("command_center")
+    ts.load_extension('fzf')
     vim.keymap.set("n", "<leader>ff", builtin.find_files, m)
     vim.keymap.set("n", "<leader>;", builtin.commands, m)
     vim.keymap.set("n", "<leader>fb", builtin.buffers, m)
@@ -566,7 +574,6 @@ vim.api.nvim_create_autocmd({ "FileType" }, {
     vim.o.shiftwidth = 2
     vim.o.tabstop = 2
     vim.o.softtabstop = 2
-    local m = { noremap = true, nowait = true }
     vim.keymap.set("i", ";n", "<esc>/<++<cr>:noh<cr>cf>", m)
     vim.keymap.set("i", ";1", "# ", m)
     vim.keymap.set("i", ";2", "## ", m)
@@ -584,7 +591,6 @@ vim.api.nvim_create_autocmd({ "FileType" }, {
   end
 })
 
-local m = { noremap = true, nowait = true }
 vim.keymap.set("n", "<esc>", ":nohlsearch<cr>", m)
 vim.keymap.set("n", "<c-s>", "*N", m)
 vim.keymap.set("n", "<leader>fm", function()
