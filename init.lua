@@ -31,6 +31,85 @@ vim.o.scrolloff = 7
 
 local m = { noremap = true }
 
+local dap = {
+  "mfussenegger/nvim-dap",
+  dependencies = {
+    {
+      "ravenxrz/DAPInstall.nvim",
+      config = function()
+        local dap_install = require("dap-install")
+        dap_install.setup({
+          installation_path = vim.fn.stdpath("data") .. "/dapinstall/",
+        })
+      end
+    },
+    "theHamsta/nvim-dap-virtual-text",
+    "rcarriga/nvim-dap-ui",
+    "nvim-dap-virtual-text",
+    "nvim-telescope/telescope-dap.nvim",
+  },
+  config = function()
+    local dap = require("dap")
+    local dapui = require("dapui")
+    dapui.setup()
+    require("nvim-dap-virtual-text").setup()
+    dap.adapters.delve = {
+      type = 'server',
+      port = '${port}',
+      executable = {
+        command = 'dlv',
+        args = { 'dap', '-l', '127.0.0.1:${port}' },
+      }
+    }
+    dap.configurations.go = {
+      {
+        type = "delve",
+        name = "Debug",
+        request = "launch",
+        program = "${file}"
+      },
+      {
+        type = "delve",
+        name = "Debug test", -- configuration for debugging test files
+        request = "launch",
+        mode = "test",
+        program = "${file}"
+      },
+      -- works with go.mod packages and sub packages
+      {
+        type = "delve",
+        name = "Debug test (go.mod)",
+        request = "launch",
+        mode = "test",
+        program = "./${relativeFileDirname}"
+      }
+    }
+    vim.keymap.set("n", "<leader>'q", ":Telescope dap<CR>", m)
+    vim.keymap.set("n", "<leader>'t", dap.toggle_breakpoint, m)
+    vim.keymap.set("n", "<leader>'n", dap.continue, m)
+    vim.keymap.set("n", "<leader>'s", dap.terminate, m)
+    vim.keymap.set("n", "<leader>'u", dapui.toggle, m)
+
+    vim.api.nvim_set_hl(0, 'DapBreakpoint', { ctermbg = 0, fg = '#993939', bg = '#31353f' })
+    vim.api.nvim_set_hl(0, 'DapLogPoint', { ctermbg = 0, fg = '#61afef', bg = '#31353f' })
+    vim.api.nvim_set_hl(0, 'DapStopped', { ctermbg = 0, fg = '#98c379', bg = '#31353f' })
+
+    vim.fn.sign_define('DapBreakpoint',
+      { text = '', texthl = 'DapBreakpoint', linehl = 'DapBreakpoint', numhl = 'DapBreakpoint' })
+    vim.fn.sign_define('DapBreakpointCondition',
+      { text = 'ﳁ', texthl = 'DapBreakpoint', linehl = 'DapBreakpoint', numhl = 'DapBreakpoint' })
+    vim.fn.sign_define('DapBreakpointRejected',
+      { text = '', texthl = 'DapBreakpoint', linehl = 'DapBreakpoint', numhl = 'DapBreakpoint' })
+    vim.fn.sign_define('DapLogPoint', {
+      text = '',
+      texthl = 'DapLogPoint',
+      linehl = 'DapLogPoint',
+      numhl = 'DapLogPoint'
+    })
+    vim.fn.sign_define('DapStopped', { text = '', texthl = 'DapStopped', linehl = 'DapStopped', numhl = 'DapStopped' })
+  end
+}
+
 local wilder = {
   'gelguy/wilder.nvim',
   config = function()
@@ -39,6 +118,8 @@ local wilder = {
       modes = { ':' },
       next_key = '<Tab>',
       previous_key = '<S-Tab>',
+      --[[ next_key = '<c-j>',
+      previous_key = '<c-k>', ]]
     }
     wilder.set_option('renderer', wilder.popupmenu_renderer(
       wilder.popupmenu_palette_theme({
@@ -571,9 +652,6 @@ local telescope = {
     vim.keymap.set("n", "<leader>ff", function()
       builtin.find_files({ hidden = true, layout_config = { prompt_position = "top" } })
     end, m)
-    vim.keymap.set("n", "<leader>;", function()
-      builtin.commands(require("telescope.themes").get_dropdown { previewer = true })
-    end, m)
     vim.keymap.set("n", "<leader>fb", builtin.buffers, m)
   end,
 }
@@ -633,6 +711,9 @@ vim.api.nvim_create_autocmd({ "FileType" }, {
   end
 })
 
+vim.keymap.set("n", "S", ":w<cr>", m)
+vim.keymap.set("n", "Q", ":q<cr>", m)
+vim.keymap.set({ "n", "v" }, "`", "~", m)
 vim.keymap.set("n", "<esc>", ":nohlsearch<cr>", m)
 vim.keymap.set("n", "<c-s>", "*N", m)
 vim.keymap.set("n", "<leader>fm", function()
@@ -655,4 +736,5 @@ require("lazy").setup({
   nvterm,
   fzf,
   wilder,
+  dap,
 })
