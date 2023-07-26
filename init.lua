@@ -1,5 +1,5 @@
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
-if not vim.loop.fs_stat(lazypath) then
+if not vim.uv.fs_stat(lazypath) then
   vim.fn.system({
     "git",
     "clone",
@@ -34,20 +34,10 @@ local m = { noremap = true }
 local dap = {
   "mfussenegger/nvim-dap",
   dependencies = {
-    --[[ {
-      "ravenxrz/DAPInstall.nvim",
-      config = function()
-        local dap_install = require("dap-install")
-        dap_install.setup({
-          installation_path = vim.fn.stdpath("data") .. "/dapinstall/",
-        })
-      end
-    }, ]]
     "theHamsta/nvim-dap-virtual-text",
     "rcarriga/nvim-dap-ui",
     "nvim-dap-virtual-text",
     "nvim-telescope/telescope-dap.nvim",
-    -- "ldelossa/nvim-dap-projects",
     "jay-babu/mason-nvim-dap.nvim",
   },
   config = function()
@@ -55,47 +45,6 @@ local dap = {
     local dapui = require("dapui")
     dapui.setup()
     require("nvim-dap-virtual-text").setup()
-    --[[ dap.adapters.delve = {
-      type = 'server',
-      port = '${port}',
-      executable = {
-        command = 'dlv',
-        args = { 'dap', '-l', '127.0.0.1:${port}' },
-      }
-    }
-    dap.configurations.go = {
-      {
-        type = "delve",
-        name = "Debug",
-        request = "launch",
-        program = "${file}"
-      },
-      {
-        type = "delve",
-        name = "Debug test", -- configuration for debugging test files
-        request = "launch",
-        mode = "test",
-        program = "${file}"
-      },
-      -- works with go.mod packages and sub packages
-      {
-        type = "delve",
-        name = "Debug test (go.mod)",
-        request = "launch",
-        mode = "test",
-        program = "./${relativeFileDirname}"
-      }
-    } ]]
-    --[[ dap.adapters.lldb = {
-      type = "executable",
-      command = "/usr/bin/lldb-vscode",
-      name = "lldb",
-    }
-    dap.configurations.cpp = {
-      name = "Lanch",
-      type = "lldb",
-      request = "Lanch",
-    } ]]
     vim.keymap.set("n", "<leader>'q", ":Telescope dap<CR>", m)
     vim.keymap.set("n", "<leader>'t", dap.toggle_breakpoint, m)
     vim.keymap.set("n", "<leader>'n", dap.continue, m)
@@ -360,13 +309,14 @@ local nvimtree = {
 }
 
 local treesitter = {
-  "nvim-treesitter/playground",
+  -- "nvim-treesitter/playground",
   "nvim-treesitter/nvim-treesitter",
   build = ":TSUpdate",
   config = function()
     local configs = require("nvim-treesitter.configs")
     configs.setup({
-      ensure_installed = { "query", "lua", "go" },
+      -- ensure_installed = { "query", "lua", "go" },
+      ensure_installed = { "lua", "go" },
       highlight = {
         enable = true,
         use_languagetree = true,
@@ -408,6 +358,10 @@ local lsp = {
     "hrsh7th/cmp-cmdline",
     "hrsh7th/cmp-vsnip",
     "hrsh7th/vim-vsnip",
+    {
+      "lvimuser/lsp-inlayhints.nvim",
+      branch = "anticonceal",
+    },
   },
   config = function()
     -- cmp
