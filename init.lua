@@ -34,7 +34,7 @@ local m = { noremap = true }
 local dap = {
   "mfussenegger/nvim-dap",
   dependencies = {
-    {
+    --[[ {
       "ravenxrz/DAPInstall.nvim",
       config = function()
         local dap_install = require("dap-install")
@@ -42,18 +42,20 @@ local dap = {
           installation_path = vim.fn.stdpath("data") .. "/dapinstall/",
         })
       end
-    },
+    }, ]]
     "theHamsta/nvim-dap-virtual-text",
     "rcarriga/nvim-dap-ui",
     "nvim-dap-virtual-text",
     "nvim-telescope/telescope-dap.nvim",
+    -- "ldelossa/nvim-dap-projects",
+    "jay-babu/mason-nvim-dap.nvim",
   },
   config = function()
     local dap = require("dap")
     local dapui = require("dapui")
     dapui.setup()
     require("nvim-dap-virtual-text").setup()
-    dap.adapters.delve = {
+    --[[ dap.adapters.delve = {
       type = 'server',
       port = '${port}',
       executable = {
@@ -83,7 +85,17 @@ local dap = {
         mode = "test",
         program = "./${relativeFileDirname}"
       }
+    } ]]
+    --[[ dap.adapters.lldb = {
+      type = "executable",
+      command = "/usr/bin/lldb-vscode",
+      name = "lldb",
     }
+    dap.configurations.cpp = {
+      name = "Lanch",
+      type = "lldb",
+      request = "Lanch",
+    } ]]
     vim.keymap.set("n", "<leader>'q", ":Telescope dap<CR>", m)
     vim.keymap.set("n", "<leader>'t", dap.toggle_breakpoint, m)
     vim.keymap.set("n", "<leader>'n", dap.continue, m)
@@ -107,6 +119,20 @@ local dap = {
       numhl = 'DapLogPoint'
     })
     vim.fn.sign_define('DapStopped', { text = '', texthl = 'DapStopped', linehl = 'DapStopped', numhl = 'DapStopped' })
+
+    -- require("nvim-dap-projects").search_project_config()
+    require("mason-nvim-dap").setup({
+      ensure_installed = { "delve" },
+      automatic_installation = false,
+      handlers = {
+        function(config)
+          -- all sources with no handler get passed here
+
+          -- Keep original functionality
+          require('mason-nvim-dap').default_setup(config)
+        end,
+      }
+    })
   end
 }
 
