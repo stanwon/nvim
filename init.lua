@@ -121,6 +121,7 @@ local wilder = {
       --[[ next_key = '<c-j>',
       previous_key = '<c-k>', ]]
     }
+    wilder.set_option('use_python_remote_plugin', 0)
     wilder.set_option('renderer', wilder.popupmenu_renderer(
       wilder.popupmenu_palette_theme({
         highlights = {
@@ -333,12 +334,13 @@ local nvimtree = {
 }
 
 local treesitter = {
+  "nvim-treesitter/playground",
   "nvim-treesitter/nvim-treesitter",
   build = ":TSUpdate",
   config = function()
     local configs = require("nvim-treesitter.configs")
     configs.setup({
-      ensure_installed = { "lua", "go" },
+      ensure_installed = { "query", "lua", "go" },
       highlight = {
         enable = true,
         use_languagetree = true,
@@ -713,7 +715,27 @@ vim.api.nvim_create_autocmd({ "FileType" }, {
 
 vim.keymap.set("n", "S", ":w<cr>", m)
 vim.keymap.set("n", "Q", ":q<cr>", m)
+vim.keymap.set("n", "sk", ":set nosplitbelow<CR>:split<CR>:set splitbelow<CR>")
+vim.keymap.set("n", "sj", ":set splitbelow<CR>:split<CR>")
+vim.keymap.set("n", "sh", ":set nosplitright<CR>:vsplit<CR>:set splitright<CR>")
+vim.keymap.set("n", "sl", ":set splitright<CR>:vsplit<CR>")
+vim.keymap.set("n", "<up>", ":res +5<CR>")
+vim.keymap.set("n", "<down>", ":res -5<CR>")
+vim.keymap.set("n", "<left>", ":vertical resize-5<CR>")
+vim.keymap.set("n", "<right>", ":vertical resize+5<CR>")
+vim.keymap.set("n", "tn", ":tabe<CR>")
+vim.keymap.set("n", "tN", ":tab split<CR>")
+vim.keymap.set("n", "th", ":-tabnext<CR>")
+vim.keymap.set("n", "tl", ":+tabnext<CR>")
+vim.keymap.set("n", "tmh", ":-tabmove<CR>")
+vim.keymap.set("n", "tml", ":+tabmove<CR>")
 vim.keymap.set({ "n", "v" }, "`", "~", m)
+vim.keymap.set({ "n", "v" }, "<c-k>", "5<c-y>", m)
+vim.keymap.set({ "n", "v" }, "<c-j>", "5<c-e>", m)
+vim.keymap.set({ "n", "v" }, "J", "5j", m)
+vim.keymap.set({ "n", "v" }, "K", "5k", m)
+vim.keymap.set({ "n", "v" }, "H", "0", m)
+vim.keymap.set({ "n", "v" }, "L", "$", m)
 vim.keymap.set("n", "<esc>", ":nohlsearch<cr>", m)
 vim.keymap.set("n", "<c-s>", "*N", m)
 vim.keymap.set("n", "<leader>fm", function()
