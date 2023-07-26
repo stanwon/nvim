@@ -69,15 +69,11 @@ local dap = {
     })
     vim.fn.sign_define('DapStopped', { text = '', texthl = 'DapStopped', linehl = 'DapStopped', numhl = 'DapStopped' })
 
-    -- require("nvim-dap-projects").search_project_config()
     require("mason-nvim-dap").setup({
-      ensure_installed = { "delve" },
-      automatic_installation = false,
+      ensure_installed = { "delve", "codelldb", "cpptools" },
+      automatic_installation = true,
       handlers = {
         function(config)
-          -- all sources with no handler get passed here
-
-          -- Keep original functionality
           require('mason-nvim-dap').default_setup(config)
         end,
       }
@@ -316,7 +312,7 @@ local treesitter = {
     local configs = require("nvim-treesitter.configs")
     configs.setup({
       -- ensure_installed = { "query", "lua", "go" },
-      ensure_installed = { "lua", "go" },
+      ensure_installed = { "lua", "go", "c" },
       highlight = {
         enable = true,
         use_languagetree = true,
@@ -423,7 +419,7 @@ local lsp = {
     -- lspconfig
     local capabilities = require("cmp_nvim_lsp").default_capabilities()
     local lspconfig = require("lspconfig")
-    local servers = { "lua_ls", "gopls" }
+    local servers = { "lua_ls", "gopls", "clangd" }
     for _, lsp in ipairs(servers) do
       lspconfig[lsp].setup({
         capabilities = capabilities,
