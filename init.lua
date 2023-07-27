@@ -226,9 +226,9 @@ local fzf = {
 local nvterm = {
   "NvChad/nvterm",
   config = function()
-    vim.keymap.set("n", "<leader>h", function()
+    --[[ vim.keymap.set("n", "<leader>h", function()
       require("nvterm.terminal").toggle "horizontal"
-    end, m)
+    end, m) ]]
     vim.keymap.set("n", "<leader>v", function()
       require("nvterm.terminal").toggle "vertical"
     end, m)
@@ -292,6 +292,8 @@ local bufferline = {
 local nvimtree = {
   "nvim-tree/nvim-tree.lua",
   config = function()
+    vim.g.loaded_netrw = 1
+    vim.g.loaded_netrwPlugin = 1
     local function my_on_attach(bufnr)
       local api = require "nvim-tree.api"
       local function opts(desc)
@@ -300,21 +302,29 @@ local nvimtree = {
       -- default mappings
       api.config.mappings.default_on_attach(bufnr)
       -- custom mappings
-      vim.keymap.set('n', '<C-t>', api.tree.change_root_to_parent, opts('Up'))
+      vim.keymap.set('n', '-', api.tree.change_root_to_parent, opts('Up to root dir'))
+      vim.keymap.set('n', '=', api.tree.change_root_to_node, opts('Into node dir'))
       vim.keymap.set('n', '?', api.tree.toggle_help, opts('Help'))
+      vim.keymap.set('n', 'l', api.node.open.tab, opts('Open: New Tab'))
+      -- vim.keymap.set('n', 'l', "" )
+      vim.keymap.set('n', 'o', api.node.open.tab, opts('Open: New Tab'))
+      vim.keymap.set('n', 'H', api.tree.toggle_hidden_filter, opts('Toggle Filter: Dotfiles'))
     end
     require("nvim-tree").setup({
       on_attach = my_on_attach,
       sort_by = "case_sensitive",
-      view = {
-        width = 30,
-      },
+      hijack_cursor = true,
       renderer = {
         group_empty = true,
+        root_folder_label = false,
+        indent_markers = {
+          enable = true,
+        },
       },
       filters = {
         dotfiles = true,
       },
+      disable_netrw = true,
     })
   end
 }
@@ -766,8 +776,16 @@ vim.api.nvim_create_autocmd('LspAttach', {
   end,
 })
 
+
+-- pre-keymap
 vim.keymap.set("n", "S", ":w<cr>", m)
 vim.keymap.set("n", "Q", ":q<cr>", m)
+vim.keymap.set("n", "<leader>tt", ":NvimTreeToggle<cr>")
+vim.keymap.set("n", "<leader>w", "<C-w>w")
+vim.keymap.set("n", "<leader>k", "<C-w>k")
+vim.keymap.set("n", "<leader>j", "<C-w>j")
+vim.keymap.set("n", "<leader>h", "<C-w>h")
+vim.keymap.set("n", "<leader>l", "<C-w>l")
 vim.keymap.set("n", "sk", ":set nosplitbelow<CR>:split<CR>:set splitbelow<CR>")
 vim.keymap.set("n", "sj", ":set splitbelow<CR>:split<CR>")
 vim.keymap.set("n", "sh", ":set nosplitright<CR>:vsplit<CR>:set splitright<CR>")
