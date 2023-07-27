@@ -43,8 +43,10 @@ local dap = {
   config = function()
     local dap = require("dap")
     local dapui = require("dapui")
+
     dapui.setup()
     require("nvim-dap-virtual-text").setup()
+
     vim.keymap.set("n", "<leader>'q", ":Telescope dap<CR>", m)
     vim.keymap.set("n", "<leader>'t", dap.toggle_breakpoint, m)
     vim.keymap.set("n", "<leader>'n", dap.continue, m)
@@ -138,7 +140,8 @@ local fzf = {
         height     = 1,
         width      = 1,
         preview    = {
-          layout = 'vertical',
+          -- layout = 'vertical',
+          layout = 'horizontal',
           scrollbar = 'float',
         },
         fullscreen = true,
@@ -151,24 +154,24 @@ local fzf = {
           ["<c-f>"]    = "toggle-fullscreen",
           ["<c-r>"]    = "toggle-preview-wrap",
           ["<c-p>"]    = "toggle-preview",
-          ["<c-y>"]    = "preview-page-down",
-          ["<c-l>"]    = "preview-page-up",
+          ["<c-l>"]    = "preview-page-down",
+          ["<c-h>"]    = "preview-page-up",
           ["<S-left>"] = "preview-page-reset",
         },
         fzf = {
-          ["esc"]        = "abort",
-          ["ctrl-h"]     = "unix-line-discard",
-          ["ctrl-k"]     = "half-page-down",
-          ["ctrl-b"]     = "half-page-up",
-          ["ctrl-n"]     = "beginning-of-line",
-          ["ctrl-a"]     = "end-of-line",
-          ["alt-a"]      = "toggle-all",
-          ["f3"]         = "toggle-preview-wrap",
-          ["f4"]         = "toggle-preview",
-          ["shift-down"] = "preview-page-down",
-          ["shift-up"]   = "preview-page-up",
-          ["ctrl-e"]     = "down",
-          ["ctrl-u"]     = "up",
+          ["esc"]    = "abort",
+          ["ctrl-d"] = "unix-line-discard",
+          -- ["ctrl-h"]     = "half-page-down",
+          -- ["ctrl-l"]     = "half-page-up",
+          ["ctrl-i"] = "beginning-of-line",
+          ["ctrl-a"] = "end-of-line",
+          -- ["alt-a"]      = "toggle-all",
+          -- ["f3"]         = "toggle-preview-wrap",
+          -- ["f4"]         = "toggle-preview",
+          -- ["shift-down"] = "preview-page-down",
+          -- ["shift-up"]   = "preview-page-up",
+          ["ctrl-j"] = "down",
+          ["ctrl-k"] = "up",
         },
       },
       previewers = {
@@ -289,7 +292,19 @@ local bufferline = {
 local nvimtree = {
   "nvim-tree/nvim-tree.lua",
   config = function()
+    local function my_on_attach(bufnr)
+      local api = require "nvim-tree.api"
+      local function opts(desc)
+        return { desc = "nvim-tree: " .. desc, buffer = bufnr, noremap = true, silent = true, nowait = true }
+      end
+      -- default mappings
+      api.config.mappings.default_on_attach(bufnr)
+      -- custom mappings
+      vim.keymap.set('n', '<C-t>', api.tree.change_root_to_parent, opts('Up'))
+      vim.keymap.set('n', '?', api.tree.toggle_help, opts('Help'))
+    end
     require("nvim-tree").setup({
+      on_attach = my_on_attach,
       sort_by = "case_sensitive",
       view = {
         width = 30,
@@ -354,6 +369,7 @@ local lsp = {
     "hrsh7th/cmp-cmdline",
     "hrsh7th/cmp-vsnip",
     "hrsh7th/vim-vsnip",
+    "simrat39/inlay-hints.nvim",
     {
       "lvimuser/lsp-inlayhints.nvim",
       branch = "anticonceal",
@@ -424,6 +440,17 @@ local lsp = {
       lspconfig[lsp].setup({
         capabilities = capabilities,
         settings = {
+          gopls = {
+            hints = {
+              assignVariableTypes = true,
+              compositeLiteralFields = true,
+              compositeLiteralTypes = true,
+              constantValues = true,
+              functionTypeParameters = true,
+              parameterNames = true,
+              rangeVariableTypes = true,
+            },
+          },
           Lua = {
             diagnostics = {
               globals = { 'vim' }
@@ -440,6 +467,12 @@ local lsp = {
         }
       })
     end
+
+    require("lsp-inlayhints").setup {
+      enabled_at_startup = true,
+      debug_mode = true,
+    }
+    -- require("inlay-hints").setup()
   end
 }
 
@@ -658,8 +691,7 @@ vim.api.nvim_create_autocmd({ "FileType" }, {
   pattern = "help",
   callback = function()
     vim.cmd [[
-    wincmd L
-    vertical resize +15
+    wincmd T
     ]]
   end
 })
@@ -700,6 +732,37 @@ vim.api.nvim_create_autocmd("LspAttach", {
     local bufnr = args.buf
     local client = vim.lsp.get_client_by_id(args.data.client_id)
     require("lsp-inlayhints").on_attach(client, bufnr)
+    vim.cmd("hi link LspInlayHint Comment")
+    require('lsp-inlayhints').toggle()
+  end,
+})
+
+vim.api.nvim_create_autocmd('LspAttach', {
+  group = vim.api.nvim_create_augroup('UserLspConfig', {}),
+  callback = function(ev)
+    -- Enable completion triggered by <c-x><c-o>
+    vim.bo[ev.buf].omnifunc = 'v:lua.vim.lsp.omnifunc'
+
+    -- Buffer local mappings.
+    -- See `:help vim.lsp.*` for documentation on any of the below functions
+    local opts = { buffer = ev.buf }
+    vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, opts)
+    vim.keymap.set('n', 'gd', vim.lsp.buf.definition, opts)
+    -- vim.keymap.set('n', 'K', vim.lsp.buf.hover, opts)
+    vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, opts)
+    -- vim.keymap.set('n', '<C-k>', vim.lsp.buf.signature_help, opts)
+    vim.keymap.set('n', '<space>wa', vim.lsp.buf.add_workspace_folder, opts)
+    vim.keymap.set('n', '<space>wr', vim.lsp.buf.remove_workspace_folder, opts)
+    vim.keymap.set('n', '<space>wl', function()
+      print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
+    end, opts)
+    vim.keymap.set('n', '<space>D', vim.lsp.buf.type_definition, opts)
+    vim.keymap.set('n', '<space>rn', vim.lsp.buf.rename, opts)
+    vim.keymap.set({ 'n', 'v' }, '<space>ca', vim.lsp.buf.code_action, opts)
+    vim.keymap.set('n', 'gr', vim.lsp.buf.references, opts)
+    vim.keymap.set('n', '<space>f', function()
+      vim.lsp.buf.format { async = true }
+    end, opts)
   end,
 })
 
@@ -731,6 +794,11 @@ vim.keymap.set("n", "<c-s>", "*N", m)
 vim.keymap.set("n", "<leader>fm", function()
   vim.lsp.buf.format { async = true }
 end, m)
+vim.keymap.set("n", "<leader>in", function()
+  require('lsp-inlayhints').toggle()
+  -- vim.cmd("hi link LspInlayHint Comment")
+end, m)
+
 
 require("lazy").setup({
   treesitter,
