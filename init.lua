@@ -23,13 +23,87 @@ vim.o.softtabstop = 2
 vim.o.shiftwidth = 2
 vim.o.autoindent = true
 vim.o.wrap = true
-vim.o.autochdir = true
 vim.o.list = true
 vim.o.listchars = "tab:> ,trail:▫"
 vim.o.clipboard = "unnamedplus"
 vim.o.scrolloff = 7
 
 local m = { noremap = true }
+
+local dropbar = {
+  "Bekaboo/dropbar.nvim",
+  commit = "19011d96959cd40a7173485ee54202589760caae",
+  config = function()
+    local api = require("dropbar.api")
+    vim.keymap.set('n', '<Leader>;', api.pick)
+    vim.keymap.set('n', '[c', api.goto_context_start)
+    vim.keymap.set('n', ']c', api.select_next_context)
+
+    local confirm = function()
+      local menu = api.get_current_dropbar_menu()
+      if not menu then
+        return
+      end
+      local cursor = vim.api.nvim_win_get_cursor(menu.win)
+      local component = menu.entries[cursor[1]]:first_clickable(cursor[2])
+      if component then
+        menu:click_on(component)
+      end
+    end
+
+    local quit_curr = function()
+      local menu = api.get_current_dropbar_menu()
+      if menu then
+        menu:close()
+      end
+    end
+
+    require("dropbar").setup({
+      menu = {
+        -- When on, automatically set the cursor to the closest previous/next
+        -- clickable component in the direction of cursor movement on CursorMoved
+        quick_navigation = true,
+        ---@type table<string, string|function|table<string, string|function>>
+        keymaps = {
+          ['<LeftMouse>'] = function()
+            local menu = api.get_current_dropbar_menu()
+            if not menu then
+              return
+            end
+            local mouse = vim.fn.getmousepos()
+            if mouse.winid ~= menu.win then
+              local parent_menu = api.get_dropbar_menu(mouse.winid)
+              if parent_menu and parent_menu.sub_menu then
+                parent_menu.sub_menu:close()
+              end
+              if vim.api.nvim_win_is_valid(mouse.winid) then
+                vim.api.nvim_set_current_win(mouse.winid)
+              end
+              return
+            end
+            menu:click_at({ mouse.line, mouse.column }, nil, 1, 'l')
+          end,
+          ['<CR>'] = confirm,
+          ['i'] = confirm,
+          ['<esc>'] = quit_curr,
+          ['q'] = quit_curr,
+          ['n'] = quit_curr,
+          ['<MouseMove>'] = function()
+            local menu = api.get_current_dropbar_menu()
+            if not menu then
+              return
+            end
+            local mouse = vim.fn.getmousepos()
+            if mouse.winid ~= menu.win then
+              return
+            end
+            menu:update_hover_hl({ mouse.line, mouse.column - 1 })
+          end,
+        },
+      },
+    })
+  end
+}
 
 local dap = {
   "mfussenegger/nvim-dap",
@@ -47,11 +121,11 @@ local dap = {
     dapui.setup()
     require("nvim-dap-virtual-text").setup()
 
-    vim.keymap.set("n", "<leader>'q", ":Telescope dap<CR>", m)
-    vim.keymap.set("n", "<leader>'t", dap.toggle_breakpoint, m)
-    vim.keymap.set("n", "<leader>'n", dap.continue, m)
-    vim.keymap.set("n", "<leader>'s", dap.terminate, m)
-    vim.keymap.set("n", "<leader>'u", dapui.toggle, m)
+    vim.keymap.set("n", ";q", ":Telescope dap<CR>", m)
+    vim.keymap.set("n", ";b", dap.toggle_breakpoint, m)
+    vim.keymap.set("n", ";n", dap.continue, m)
+    vim.keymap.set("n", ";s", dap.terminate, m)
+    vim.keymap.set("n", ";d", dapui.toggle, m)
 
     vim.api.nvim_set_hl(0, 'DapBreakpoint', { ctermbg = 0, fg = '#993939', bg = '#31353f' })
     vim.api.nvim_set_hl(0, 'DapLogPoint', { ctermbg = 0, fg = '#61afef', bg = '#31353f' })
@@ -373,6 +447,7 @@ local lsp = {
   "neovim/nvim-lspconfig",
   dependencies = {
     "hrsh7th/nvim-cmp",
+    "hrsh7th/cmp-nvim-lua",
     "hrsh7th/cmp-nvim-lsp",
     "hrsh7th/cmp-buffer",
     "hrsh7th/cmp-path",
@@ -412,6 +487,7 @@ local lsp = {
       sources = cmp.config.sources({
         { name = "nvim_lsp" },
         { name = "vsnip" },
+        { name = "nvim_lua" },
       }, {
         { name = "buffer" },
       }),
@@ -469,6 +545,7 @@ local lsp = {
               library = {
                 [vim.fn.expand "$VIMRUNTIME/lua"] = true,
                 [vim.fn.expand "$VIMRUNTIME/lua/vim/lsp"] = true,
+                [vim.fn.expand(vim.fn.stdpath("config"))] = true,
               },
               maxPreload = 100000,
               preloadFileSize = 10000,
@@ -479,7 +556,7 @@ local lsp = {
     end
 
     require("lsp-inlayhints").setup {
-      enabled_at_startup = true,
+      enabled_at_startup = false,
       debug_mode = true,
     }
     -- require("inlay-hints").setup()
@@ -631,9 +708,11 @@ local telescope = {
   config = function()
     -- local m = { noremap = true, nowait = true }
     local builtin = require("telescope.builtin")
+    local actions = require("telescope.actions")
     local ts = require("telescope")
     ts.setup({
       defaults = {
+        sorting_strategy = "ascending",
         mappings = {
           i = {
             -- ["<C-h>"] = "which_key",
@@ -641,10 +720,11 @@ local telescope = {
             ["<c-j>"] = "move_selection_next",
             ["<c-h>"] = "preview_scrolling_up",
             ["<c-l>"] = "preview_scrolling_down",
+            ["<CR>"] = actions.select_tab,
             -- ["<esc>"] = "close",
           },
         },
-        initial_mode = "normal",
+        initial_mode = "insert",
         color_devicons = true,
         prompt_prefix = "🔍",
         selection_caret = " ",
@@ -689,19 +769,34 @@ local deus = {
 -- save cursor position
 vim.api.nvim_create_autocmd({ "BufReadPost" }, {
   pattern = "*",
-  callback = function()
-    vim.cmd [[
-    if @% !~# '\.git[\/\\]COMMIT_EDITMSG$' && line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g`\"" | endif
-    ]]
-  end
+  command =
+  [[if @% !~# '\.git[\/\\]COMMIT_EDITMSG$' && line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g`\"" | endif]],
 })
+-- vim.api.nvim_create_autocmd({ "BufReadPost" }, {
+-- pattern = "*",
+-- command = "",
+-- callback = function()
+-- vim.cmd [[
+-- if @% !~# '\.git[\/\\]COMMIT_EDITMSG$' && line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g`\"" | endif
+-- ]]
+-- end
+-- })
 
 -- splite help vertically
-vim.api.nvim_create_autocmd({ "FileType" }, {
+--[[ vim.api.nvim_create_autocmd({ "BufWinEnter" }, {
   pattern = "help",
+  command = "wincmd T",
+}) ]]
+vim.api.nvim_create_autocmd({ "BufWinEnter" }, {
+  pattern = "*.txt",
+  command = "wincmd T",
+})
+
+vim.api.nvim_create_autocmd({ "InsertLeave" }, {
+  pattern = "*.go",
   callback = function()
     vim.cmd [[
-    wincmd T
+    write
     ]]
   end
 })
@@ -743,7 +838,6 @@ vim.api.nvim_create_autocmd("LspAttach", {
     local client = vim.lsp.get_client_by_id(args.data.client_id)
     require("lsp-inlayhints").on_attach(client, bufnr)
     vim.cmd("hi link LspInlayHint Comment")
-    require('lsp-inlayhints').toggle()
   end,
 })
 
@@ -758,7 +852,7 @@ vim.api.nvim_create_autocmd('LspAttach', {
     local opts = { buffer = ev.buf }
     vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, opts)
     vim.keymap.set('n', 'gd', vim.lsp.buf.definition, opts)
-    -- vim.keymap.set('n', 'K', vim.lsp.buf.hover, opts)
+    vim.keymap.set('n', '<c-h>', vim.lsp.buf.hover, opts)
     vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, opts)
     -- vim.keymap.set('n', '<C-k>', vim.lsp.buf.signature_help, opts)
     vim.keymap.set('n', '<space>wa', vim.lsp.buf.add_workspace_folder, opts)
@@ -768,7 +862,7 @@ vim.api.nvim_create_autocmd('LspAttach', {
     end, opts)
     vim.keymap.set('n', '<space>D', vim.lsp.buf.type_definition, opts)
     vim.keymap.set('n', '<space>rn', vim.lsp.buf.rename, opts)
-    vim.keymap.set({ 'n', 'v' }, '<space>ca', vim.lsp.buf.code_action, opts)
+    vim.keymap.set({ 'n', 'v' }, '<space>ca', ":CodeActionMenu<cr>", opts)
     vim.keymap.set('n', 'gr', vim.lsp.buf.references, opts)
     vim.keymap.set('n', '<space>f', function()
       vim.lsp.buf.format { async = true }
@@ -780,7 +874,7 @@ vim.api.nvim_create_autocmd('LspAttach', {
 -- pre-keymap
 vim.keymap.set("n", "S", ":w<cr>", m)
 vim.keymap.set("n", "Q", ":q<cr>", m)
-vim.keymap.set("n", "<leader>tt", ":NvimTreeToggle<cr>")
+vim.keymap.set("n", "tt", ":NvimTreeToggle<cr>")
 vim.keymap.set("n", "<leader>w", "<C-w>w")
 vim.keymap.set("n", "<leader>k", "<C-w>k")
 vim.keymap.set("n", "<leader>j", "<C-w>j")
@@ -794,10 +888,10 @@ vim.keymap.set("n", "<up>", ":res +5<CR>")
 vim.keymap.set("n", "<down>", ":res -5<CR>")
 vim.keymap.set("n", "<left>", ":vertical resize-5<CR>")
 vim.keymap.set("n", "<right>", ":vertical resize+5<CR>")
-vim.keymap.set("n", "tn", ":tabe<CR>")
-vim.keymap.set("n", "tN", ":tab split<CR>")
-vim.keymap.set("n", "th", ":-tabnext<CR>")
-vim.keymap.set("n", "tl", ":+tabnext<CR>")
+-- vim.keymap.set("n", "tn", ":tabe<CR>")
+-- vim.keymap.set("n", "tN", ":tab split<CR>")
+vim.keymap.set("n", "gh", ":tabprevious<CR>")
+vim.keymap.set("n", "gl", ":tabnext<CR>")
 vim.keymap.set("n", "tmh", ":-tabmove<CR>")
 vim.keymap.set("n", "tml", ":+tabmove<CR>")
 vim.keymap.set({ "n", "v" }, "`", "~", m)
@@ -817,6 +911,11 @@ vim.keymap.set("n", "<leader>in", function()
   -- vim.cmd("hi link LspInlayHint Comment")
 end, m)
 
+P = function(v)
+  print(vim.inspect(v))
+  return v
+end
+
 
 require("lazy").setup({
   treesitter,
@@ -835,4 +934,14 @@ require("lazy").setup({
   fzf,
   wilder,
   dap,
+  dropbar,
+  {
+    "test.nvim",
+    dir = "/home/stan/Workspace/code/lua/nvim-plugins/test.nvim",
+    config = function()
+      vim.keymap.set("n", ";t", function()
+        require("test").test()
+      end)
+    end,
+  },
 })
