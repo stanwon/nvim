@@ -743,7 +743,7 @@ local telescope = {
     local new
 
     if true then
-      new = require("telescope.actions").select_tab
+      new = require("telescope.actions").select_tab_drop
     else
       new = require("telescope.actions").select_default
     end
