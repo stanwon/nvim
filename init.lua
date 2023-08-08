@@ -12,6 +12,7 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 vim.g.mapleader = " "
+vim.o.showmode = false
 vim.o.termguicolors = true
 vim.o.number = true
 vim.o.relativenumber = true
@@ -101,6 +102,34 @@ local dropbar = {
           end,
         },
       },
+    })
+  end
+}
+
+local test = function()
+  local buf = vim.api.nvim_create_buf({}, {})
+  print(buf)
+end
+
+vim.keymap.set("n", "tt", test, m)
+
+local trouble = {
+  "folke/trouble.nvim",
+  dependencies = {
+    "folke/lsp-colors.nvim",
+    config = function()
+      require("lsp-colors").setup({
+        Error = "#db4b4b",
+        Warning = "#e0af68",
+        Information = "#0db9d7",
+        Hint = "#10B981"
+      })
+    end
+  },
+  config = function()
+    require("trouble").setup({
+      padding = false,
+      cycle_results = false,
     })
   end
 }
@@ -380,7 +409,7 @@ local nvimtree = {
       vim.keymap.set('n', '=', api.tree.change_root_to_node, opts('Into node dir'))
       vim.keymap.set('n', '?', api.tree.toggle_help, opts('Help'))
       vim.keymap.set('n', 'l', api.node.open.tab, opts('Open: New Tab'))
-      -- vim.keymap.set('n', 'l', "" )
+      vim.keymap.set('n', 'h', api.node.navigate.parent_close, opts('Close Directory'))
       vim.keymap.set('n', 'o', api.node.open.tab, opts('Open: New Tab'))
       vim.keymap.set('n', 'H', api.tree.toggle_hidden_filter, opts('Toggle Filter: Dotfiles'))
     end
@@ -389,7 +418,7 @@ local nvimtree = {
       sort_by = "case_sensitive",
       hijack_cursor = true,
       renderer = {
-        group_empty = true,
+        group_empty = false,
         root_folder_label = false,
         indent_markers = {
           enable = true,
@@ -414,7 +443,7 @@ local treesitter = {
       ensure_installed = { "lua", "go", "c" },
       highlight = {
         enable = true,
-        use_languagetree = true,
+        -- use_languagetree = true,
       },
       indent = { enable = false },
     })
@@ -488,6 +517,7 @@ local lsp = {
         { name = "nvim_lsp" },
         { name = "vsnip" },
         { name = "nvim_lua" },
+        { name = "path" },
       }, {
         { name = "buffer" },
       }),
@@ -495,8 +525,8 @@ local lsp = {
         ['<C-e>'] = cmp.mapping.abort(),
         ['<CR>'] = cmp.mapping({
           i = function(fallback)
-            if cmp.visible() and cmp.get_active_entry() then
-              cmp.confirm({ behavior = cmp.ConfirmBehavior.Replace, select = false })
+            if cmp.visible() then
+              cmp.confirm({ behavior = cmp.ConfirmBehavior.Replace })
             else
               fallback()
             end
@@ -559,7 +589,7 @@ local lsp = {
       enabled_at_startup = false,
       debug_mode = true,
     }
-    -- require("inlay-hints").setup()
+    require("inlay-hints").setup()
   end
 }
 
@@ -710,6 +740,14 @@ local telescope = {
     local builtin = require("telescope.builtin")
     local actions = require("telescope.actions")
     local ts = require("telescope")
+    local new
+
+    if true then
+      new = require("telescope.actions").select_tab
+    else
+      new = require("telescope.actions").select_default
+    end
+
     ts.setup({
       defaults = {
         sorting_strategy = "ascending",
@@ -722,6 +760,15 @@ local telescope = {
             ["<c-l>"] = "preview_scrolling_down",
             ["<CR>"] = actions.select_tab,
             -- ["<esc>"] = "close",
+            ["<cr>"] = new,
+          },
+          n = {
+            --[[ ["<cr>"] = function()
+              if true then
+                return require('telescope.actions').select_default
+              end
+              return require('telescope.actions').select_tab
+            end, ]]
           },
         },
         initial_mode = "insert",
@@ -750,10 +797,13 @@ local telescope = {
     ts.load_extension("command_palette")
     ts.load_extension("command_center")
     ts.load_extension('fzf')
-    vim.keymap.set("n", "<leader>ff", function()
+    vim.keymap.set("n", "<leader>sf", function()
       builtin.find_files({ hidden = true, layout_config = { prompt_position = "top" } })
     end, m)
-    vim.keymap.set("n", "<leader>fb", builtin.buffers, m)
+    vim.keymap.set("n", "<leader>sh", function()
+      builtin.help_tags()
+    end, m)
+    vim.keymap.set("n", "<leader>sb", builtin.buffers, m)
   end,
 }
 
@@ -769,8 +819,9 @@ local deus = {
 -- save cursor position
 vim.api.nvim_create_autocmd({ "BufReadPost" }, {
   pattern = "*",
-  command =
-  [[if @% !~# '\.git[\/\\]COMMIT_EDITMSG$' && line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g`\"" | endif]],
+  command = [[
+    if @% !~# '\.git[\/\\]COMMIT_EDITMSG$' && line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g`\"" | endif
+    ]],
 })
 -- vim.api.nvim_create_autocmd({ "BufReadPost" }, {
 -- pattern = "*",
@@ -783,10 +834,6 @@ vim.api.nvim_create_autocmd({ "BufReadPost" }, {
 -- })
 
 -- splite help vertically
---[[ vim.api.nvim_create_autocmd({ "BufWinEnter" }, {
-  pattern = "help",
-  command = "wincmd T",
-}) ]]
 vim.api.nvim_create_autocmd({ "BufWinEnter" }, {
   pattern = "*.txt",
   command = "wincmd T",
@@ -870,6 +917,17 @@ vim.api.nvim_create_autocmd('LspAttach', {
   end,
 })
 
+vim.api.nvim_create_autocmd("InsertLeave", {
+  pattern = "*.go",
+  command = "write",
+})
+
+vim.api.nvim_create_autocmd("InsertLeave", {
+  pattern = "*",
+  callback = function()
+    vim.system({ "fcitx-remote", "-c" })
+  end,
+})
 
 -- pre-keymap
 vim.keymap.set("n", "S", ":w<cr>", m)
@@ -888,12 +946,12 @@ vim.keymap.set("n", "<up>", ":res +5<CR>")
 vim.keymap.set("n", "<down>", ":res -5<CR>")
 vim.keymap.set("n", "<left>", ":vertical resize-5<CR>")
 vim.keymap.set("n", "<right>", ":vertical resize+5<CR>")
--- vim.keymap.set("n", "tn", ":tabe<CR>")
--- vim.keymap.set("n", "tN", ":tab split<CR>")
+vim.keymap.set("n", "gn", ":tabnew<CR>")
+vim.keymap.set("n", "gs", ":tab split<CR>")
 vim.keymap.set("n", "gh", ":tabprevious<CR>")
 vim.keymap.set("n", "gl", ":tabnext<CR>")
-vim.keymap.set("n", "tmh", ":-tabmove<CR>")
-vim.keymap.set("n", "tml", ":+tabmove<CR>")
+vim.keymap.set("n", "gmh", ":-tabmove<CR>")
+vim.keymap.set("n", "gml", ":+tabmove<CR>")
 vim.keymap.set({ "n", "v" }, "`", "~", m)
 vim.keymap.set({ "n", "v" }, "<c-k>", "5<c-y>", m)
 vim.keymap.set({ "n", "v" }, "<c-j>", "5<c-e>", m)
@@ -908,7 +966,6 @@ vim.keymap.set("n", "<leader>fm", function()
 end, m)
 vim.keymap.set("n", "<leader>in", function()
   require('lsp-inlayhints').toggle()
-  -- vim.cmd("hi link LspInlayHint Comment")
 end, m)
 
 P = function(v)
@@ -945,3 +1002,22 @@ require("lazy").setup({
     end,
   },
 })
+
+--[[ local split = function()
+  vim.cmd("set splitbelow")
+  vim.cmd("sp")
+  vim.cmd("res -5")
+end ]]
+local compileRun = function()
+  vim.cmd("w")
+  -- check file type
+  local ft = vim.bo.filetype
+  if ft == "go" then
+    require("nvterm.terminal").send("make", "vertical")
+    vim.cmd [[wincmd w]]
+    --[[ split()
+    vim.cmd("term make") ]]
+  end
+end
+
+vim.keymap.set('n', 'r', compileRun, { silent = true })
