@@ -31,6 +31,22 @@ vim.o.scrolloff = 7
 
 local m = { noremap = true }
 
+
+local iw = {
+  'Mr-LLLLL/interestingwords.nvim',
+  config = function()
+    require("interestingwords").setup {
+      colors = { '#aeee00', '#ff0000', '#0000ff', '#b88823', '#ffa724', '#ff2c4b' },
+      search_count = true,
+      navigation = true,
+      search_key = "<leader>m",
+      cancel_search_key = "<leader>M",
+      color_key = "<leader>k",
+      cancel_color_key = "<leader>K",
+    }
+  end
+}
+
 local dropbar = {
   "Bekaboo/dropbar.nvim",
   commit = "19011d96959cd40a7173485ee54202589760caae",
@@ -428,6 +444,11 @@ local nvimtree = {
         dotfiles = true,
       },
       disable_netrw = true,
+      actions = {
+        open_file = {
+          quit_on_open = true
+        }
+      },
     })
   end
 }
@@ -758,9 +779,9 @@ local telescope = {
             ["<c-j>"] = "move_selection_next",
             ["<c-h>"] = "preview_scrolling_up",
             ["<c-l>"] = "preview_scrolling_down",
-            ["<CR>"] = actions.select_tab,
+            ["<c-o>"] = new,
             -- ["<esc>"] = "close",
-            ["<cr>"] = new,
+            ["<cr>"] = actions.select_default,
           },
           n = {
             --[[ ["<cr>"] = function()
@@ -897,8 +918,8 @@ vim.api.nvim_create_autocmd('LspAttach', {
     -- Buffer local mappings.
     -- See `:help vim.lsp.*` for documentation on any of the below functions
     local opts = { buffer = ev.buf }
-    vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, opts)
-    vim.keymap.set('n', 'gd', vim.lsp.buf.definition, opts)
+    vim.keymap.set('n', 'gD', ":lua vim.lsp.buf.declaration({reuse_win = true})<CR>", opts)
+    vim.keymap.set('n', 'gd', ":lua vim.lsp.buf.definition({reuse_win = true})<CR>", opts)
     vim.keymap.set('n', '<c-h>', vim.lsp.buf.hover, opts)
     vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, opts)
     -- vim.keymap.set('n', '<C-k>', vim.lsp.buf.signature_help, opts)
@@ -911,6 +932,13 @@ vim.api.nvim_create_autocmd('LspAttach', {
     vim.keymap.set('n', '<space>rn', vim.lsp.buf.rename, opts)
     vim.keymap.set({ 'n', 'v' }, '<space>ca', ":CodeActionMenu<cr>", opts)
     vim.keymap.set('n', 'gr', vim.lsp.buf.references, opts)
+    vim.keymap.set('n', 'gc', function()
+      vim.cmd [[
+      wincmd j
+      quit
+      ]]
+    end, opts)
+
     vim.keymap.set('n', '<space>f', function()
       vim.lsp.buf.format { async = true }
     end, opts)
@@ -930,6 +958,7 @@ vim.api.nvim_create_autocmd("InsertLeave", {
 })
 
 -- pre-keymap
+vim.keymap.set("n", "s", "<nop>", m)
 vim.keymap.set("n", "S", ":w<cr>", m)
 vim.keymap.set("n", "Q", ":q<cr>", m)
 vim.keymap.set("n", "tt", ":NvimTreeToggle<cr>")
@@ -1001,6 +1030,7 @@ require("lazy").setup({
       end)
     end,
   },
+  iw,
 })
 
 --[[ local split = function()
