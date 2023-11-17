@@ -996,6 +996,7 @@ end, m)
 vim.keymap.set("n", "<leader>in", function()
   require('lsp-inlayhints').toggle()
 end, m)
+vim.keymap.set("n", "<leader>h", ":%!xxd -a -u -g 2 -e<cr>")
 
 P = function(v)
   print(vim.inspect(v))
@@ -1049,5 +1050,17 @@ local compileRun = function()
     vim.cmd("term make") ]]
   end
 end
+local compileRunTest = function()
+  vim.cmd("w")
+  -- check file type
+  local ft = vim.bo.filetype
+  if ft == "go" then
+    require("nvterm.terminal").send("make test", "vertical")
+    vim.cmd [[wincmd w]]
+    --[[ split()
+    vim.cmd("term make") ]]
+  end
+end
 
-vim.keymap.set('n', 'r', compileRun, { silent = true })
+vim.keymap.set('n', 'rr', compileRun, { silent = true })
+vim.keymap.set('n', 'rt', compileRunTest, { silent = true })
