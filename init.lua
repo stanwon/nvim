@@ -446,8 +446,8 @@ local nvimtree = {
       disable_netrw = true,
       actions = {
         open_file = {
-          quit_on_open = true
-        }
+          quit_on_open = true,
+        },
       },
     })
   end
@@ -514,6 +514,7 @@ local lsp = {
     -- cmp
     local cmp = require("cmp")
     cmp.setup({
+      preselect = cmp.PreselectMode.None,
       enabled = true,
       snippet = {
         expand = function(args)
@@ -544,7 +545,8 @@ local lsp = {
       }),
       mapping = {
         ['<C-e>'] = cmp.mapping.abort(),
-        ['<CR>'] = cmp.mapping({
+        ['<CR>'] = cmp.mapping.confirm({ select = false }),
+        --[[ ['<CR>'] = cmp.mapping({
           i = function(fallback)
             if cmp.visible() then
               cmp.confirm({ behavior = cmp.ConfirmBehavior.Replace })
@@ -552,7 +554,7 @@ local lsp = {
               fallback()
             end
           end
-        }),
+        }), ]]
         ["<Tab>"] = cmp.mapping(function(fallback)
           if cmp.visible() then
             cmp.select_next_item()
@@ -874,9 +876,9 @@ vim.api.nvim_create_autocmd({ "FileType" }, {
   callback = function()
     vim.o.linebreak = true
     vim.o.spell = true
-    vim.o.shiftwidth = 2
-    vim.o.tabstop = 2
-    vim.o.softtabstop = 2
+    vim.o.shiftwidth = 4
+    vim.o.tabstop = 4
+    vim.o.softtabstop = 4
     vim.keymap.set("i", ";n", "<esc>/<++<cr>:noh<cr>cf>", m)
     vim.keymap.set("i", ";1", "# ", m)
     vim.keymap.set("i", ";2", "## ", m)
@@ -953,7 +955,7 @@ vim.api.nvim_create_autocmd("InsertLeave", {
 vim.api.nvim_create_autocmd("InsertLeave", {
   pattern = "*",
   callback = function()
-    vim.system({ "fcitx-remote", "-c" })
+    vim.system({ "fcitx5-remote", "-c" })
   end,
 })
 
