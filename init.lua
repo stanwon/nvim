@@ -28,9 +28,22 @@ vim.o.list = true
 vim.o.listchars = "tab:> ,trail:▫"
 vim.o.clipboard = "unnamedplus"
 vim.o.scrolloff = 7
+vim.opt.jumpoptions:append("stack")
 
 local m = { noremap = true }
 
+local outline = {
+  'simrat39/symbols-outline.nvim',
+  opts = {
+    position = "left",
+    width = 50,
+    auto_close = true,
+  },
+}
+
+local nio = {
+  'nvim-neotest/nvim-nio',
+}
 
 local iw = {
   'Mr-LLLLL/interestingwords.nvim',
@@ -41,8 +54,8 @@ local iw = {
       navigation = true,
       search_key = "<leader>m",
       cancel_search_key = "<leader>M",
-      color_key = "<leader>k",
-      cancel_color_key = "<leader>K",
+      color_key = "<leader>w",
+      cancel_color_key = "<leader>W",
     }
   end
 }
@@ -118,34 +131,6 @@ local dropbar = {
           end,
         },
       },
-    })
-  end
-}
-
-local test = function()
-  local buf = vim.api.nvim_create_buf({}, {})
-  print(buf)
-end
-
-vim.keymap.set("n", "tt", test, m)
-
-local trouble = {
-  "folke/trouble.nvim",
-  dependencies = {
-    "folke/lsp-colors.nvim",
-    config = function()
-      require("lsp-colors").setup({
-        Error = "#db4b4b",
-        Warning = "#e0af68",
-        Information = "#0db9d7",
-        Hint = "#10B981"
-      })
-    end
-  },
-  config = function()
-    require("trouble").setup({
-      padding = false,
-      cycle_results = false,
     })
   end
 }
@@ -493,6 +478,16 @@ local codeAction = {
   cmd = "CodeActionMenu",
 }
 
+local has_words_before = function()
+  unpack = unpack or table.unpack
+  local line, col = unpack(vim.api.nvim_win_get_cursor(0))
+  return col ~= 0 and vim.api.nvim_buf_get_lines(0, line - 1, line, true)[1]:sub(col, col):match("%s") == nil
+end
+
+local feedkey = function(key, mode)
+  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes(key, true, true, true), mode, true)
+end
+
 local lsp = {
   "neovim/nvim-lspconfig",
   dependencies = {
@@ -538,14 +533,35 @@ local lsp = {
       sources = cmp.config.sources({
         { name = "nvim_lsp" },
         { name = "vsnip" },
+        { name = "luasnip" },
         { name = "nvim_lua" },
         { name = "path" },
+        {
+          name = 'tags',
+          option = {
+            -- this is the default options, change them if you want.
+            -- Delayed time after user input, in milliseconds.
+            complete_defer = 100,
+            -- Max items when searching `taglist`.
+            max_items = 10,
+            -- The number of characters that need to be typed to trigger
+            -- auto-completion.
+            keyword_length = 3,
+            -- Use exact word match when searching `taglist`, for better searching
+            -- performance.
+            exact_match = false,
+            -- Prioritize searching result for current buffer.
+            current_buffer_only = false,
+          },
+        },
       }, {
         { name = "buffer" },
       }),
       mapping = {
+        ['<C-b>'] = cmp.mapping.scroll_docs(-4),
+        ['<C-f>'] = cmp.mapping.scroll_docs(4),
         ['<C-e>'] = cmp.mapping.abort(),
-        ['<CR>'] = cmp.mapping.confirm({ select = false }),
+        ['<CR>'] = cmp.mapping.confirm({ select = true }),
         --[[ ['<CR>'] = cmp.mapping({
           i = function(fallback)
             if cmp.visible() then
@@ -556,21 +572,33 @@ local lsp = {
           end
         }), ]]
         ["<Tab>"] = cmp.mapping(function(fallback)
+          -- local ls = require("luasnip")
           if cmp.visible() then
             cmp.select_next_item()
+          elseif vim.fn["vsnip#available"](1) == 1 then
+            feedkey("<Plug>(vsnip-expand-or-jump)", "")
+            --[[ elseif has_words_before() then
+            cmp.complete() ]]
           else
-            fallback() -- The fallback function sends a already mapped key. In this case, it's probably `<Tab>`.
+            fallback()
           end
         end, { "i", "s" }),
 
         ["<S-Tab>"] = cmp.mapping(function()
           if cmp.visible() then
             cmp.select_prev_item()
+          elseif vim.fn["vsnip#jumpable"](-1) == 1 then
+            feedkey("<Plug>(vsnip-jump-prev)", "")
           end
         end, { "i", "s" }),
       }
     })
 
+    local cmp_autopairs = require('nvim-autopairs.completion.cmp')
+    cmp.event:on(
+      'confirm_done',
+      cmp_autopairs.on_confirm_done()
+    )
     -- lspconfig
     local capabilities = require("cmp_nvim_lsp").default_capabilities()
     local lspconfig = require("lspconfig")
@@ -614,6 +642,14 @@ local lsp = {
     }
     require("inlay-hints").setup()
   end
+}
+
+local luasnip = {
+  "L3MON4D3/LuaSnip",
+  -- follow latest release.
+  version = "v2.*", -- Replace <CurrentMajor> by the latest released major (first number of latest release)
+  -- install jsregexp (optional!).
+  build = "make install_jsregexp"
 }
 
 local mason = {
@@ -839,6 +875,305 @@ local deus = {
   end,
 }
 
+local flutter = {
+  'nvim-flutter/flutter-tools.nvim',
+  lazy = false,
+  dependencies = {
+    'nvim-lua/plenary.nvim',
+    'stevearc/dressing.nvim', -- optional for vim.ui.select
+  },
+  config = function()
+    require("flutter-tools").setup {
+      dev_log = {
+        enabled = true,
+        filter = function(log_line)
+          if log_line and log_line:match("MESA") then
+            return false
+          end
+          return true
+        end, -- optional callback to filter the log
+        -- takes a log_line as string argument; returns a boolean or nil;
+        -- the log_line is only added to the output if the function returns true
+        notify_errors = false, -- if there is an error whilst running then notify the user
+        open_cmd = "vsplit",   -- command to use to open the log buffer
+        focus_on_open = true,  -- focus on the newly opened log window
+      }
+    }
+  end,
+}
+local logHL = {
+  'fei6409/log-highlight.nvim',
+  config = function()
+    require('log-highlight').setup {
+      -- The following options support either a string or a table of strings.
+
+      -- The file extensions.
+      extension = 'log',
+
+      -- The file names or the full file paths.
+      filename = {
+        'messages',
+      },
+
+      -- The file path glob patterns, e.g. `.*%.lg`, `/var/log/.*`.
+      -- Note: `%.` is to match a literal dot (`.`) in a pattern in Lua, but most
+      -- of the time `.` and `%.` here make no observable difference.
+      pattern = {
+        '/var/log/.*',
+        'messages%..*',
+      },
+    }
+  end,
+}
+
+local zen = {
+  "folke/zen-mode.nvim",
+  opts = {
+    window = {
+      width = .6
+    }
+    -- your configuration comes here
+    -- or leave it empty to use the default settings
+    -- refer to the configuration section below
+  }
+}
+
+local tags = {
+  "quangnguyen30192/cmp-nvim-tags",
+}
+
+local colorizer = {
+  'norcalli/nvim-colorizer.lua',
+  config = function()
+    require 'colorizer'.setup()
+  end
+}
+
+local trouble = {
+  "folke/trouble.nvim",
+  opts = {
+    auto_close = false,    -- auto close when there are no items
+    auto_open = false,     -- auto open when there are items
+    auto_preview = true,   -- automatically open preview when on an item
+    auto_refresh = true,   -- auto refresh when open
+    auto_jump = false,     -- auto jump to the item when there's only one
+    focus = true,         -- Focus the window when opened
+    restore = true,        -- restores the last location in the list when opening
+    follow = true,         -- Follow the current item
+    indent_guides = true,  -- show indent guides
+    max_items = 200,       -- limit number of items that can be displayed per section
+    multiline = true,      -- render multi-line messages
+    pinned = false,        -- When pinned, the opened trouble window will be bound to the current buffer
+    warn_no_results = true, -- show a warning when there are no results
+    open_no_results = false, -- open the trouble window when there are no results
+    win = {},              -- window options for the results window. Can be a split or a floating window.
+    -- Window options for the preview window. Can be a split, floating window,
+    -- or `main` to show the preview in the main editor window.
+    preview = {
+      type = "main",
+      -- when a buffer is not yet loaded, the preview window will be created
+      -- in a scratch buffer with only syntax highlighting enabled.
+      -- Set to false, if you want the preview to always be a real loaded buffer.
+      scratch = true,
+    },
+    -- Throttle/Debounce settings. Should usually not be changed.
+    throttle = {
+      refresh = 20,                          -- fetches new data when needed
+      update = 10,                           -- updates the window
+      render = 10,                           -- renders the window
+      follow = 100,                          -- follows the current item
+      preview = { ms = 100, debounce = true }, -- shows the preview for the current item
+    },
+    -- Key mappings can be set to the name of a builtin action,
+    -- or you can define your own custom action.
+    keys = {
+      ["?"] = "help",
+      r = "refresh",
+      R = "toggle_refresh",
+      q = "close",
+      o = "jump_close",
+      ["<esc>"] = "cancel",
+      ["<cr>"] = "jump",
+      ["<2-leftmouse>"] = "jump",
+      ["<c-s>"] = "jump_split",
+      ["<c-v>"] = "jump_vsplit",
+      -- go down to next item (accepts count)
+      -- j = "next",
+      ["}"] = "next",
+      ["]]"] = "next",
+      -- go up to prev item (accepts count)
+      -- k = "prev",
+      ["{"] = "prev",
+      ["[["] = "prev",
+      dd = "delete",
+      d = { action = "delete", mode = "v" },
+      i = "inspect",
+      p = "preview",
+      P = "toggle_preview",
+      zo = "fold_open",
+      zO = "fold_open_recursive",
+      zc = "fold_close",
+      zC = "fold_close_recursive",
+      za = "fold_toggle",
+      zA = "fold_toggle_recursive",
+      zm = "fold_more",
+      zM = "fold_close_all",
+      zr = "fold_reduce",
+      zR = "fold_open_all",
+      zx = "fold_update",
+      zX = "fold_update_all",
+      zn = "fold_disable",
+      zN = "fold_enable",
+      zi = "fold_toggle_enable",
+      gb = { -- example of a custom action that toggles the active view filter
+        action = function(view)
+          view:filter({ buf = 0 }, { toggle = true })
+        end,
+        desc = "Toggle Current Buffer Filter",
+      },
+      s = { -- example of a custom action that toggles the severity
+        action = function(view)
+          local f = view:get_filter("severity")
+          local severity = ((f and f.filter.severity or 0) + 1) % 5
+          view:filter({ severity = severity }, {
+            id = "severity",
+            template = "{hl:Title}Filter:{hl} {severity}",
+            del = severity == 0,
+          })
+        end,
+        desc = "Toggle Severity Filter",
+      },
+    },
+    modes = {
+      -- sources define their own modes, which you can use directly,
+      -- or override like in the example below
+      lsp_references = {
+        -- some modes are configurable, see the source code for more details
+        params = {
+          include_declaration = true,
+        },
+      },
+      -- The LSP base mode for:
+      -- * lsp_definitions, lsp_references, lsp_implementations
+      -- * lsp_type_definitions, lsp_declarations, lsp_command
+      lsp_base = {
+        params = {
+          -- don't include the current location in the results
+          include_current = false,
+        },
+      },
+      -- more advanced example that extends the lsp_document_symbols
+      symbols = {
+        desc = "document symbols",
+        mode = "lsp_document_symbols",
+        focus = false,
+        win = { position = "right" },
+        filter = {
+          -- remove Package since luals uses it for control flow structures
+          ["not"] = { ft = "lua", kind = "Package" },
+          any = {
+            -- all symbol kinds for help / markdown files
+            ft = { "help", "markdown" },
+            -- default set of symbol kinds
+            kind = {
+              "Class",
+              "Constructor",
+              "Enum",
+              "Field",
+              "Function",
+              "Interface",
+              "Method",
+              "Module",
+              "Namespace",
+              "Package",
+              "Property",
+              "Struct",
+              "Trait",
+              -- "Variable",
+            },
+          },
+        },
+      },
+    },
+    -- stylua: ignore
+    icons = {
+      indent        = {
+        top         = "│ ",
+        middle      = "├╴",
+        last        = "└╴",
+        -- last          = "-╴",
+        -- last       = "╰╴", -- rounded
+        fold_open   = " ",
+        fold_closed = " ",
+        ws          = "  ",
+      },
+      folder_closed = " ",
+      folder_open   = " ",
+      kinds         = {
+        Array         = " ",
+        Boolean       = "󰨙 ",
+        Class         = " ",
+        Constant      = "󰏿 ",
+        Constructor   = " ",
+        Enum          = " ",
+        EnumMember    = " ",
+        Event         = " ",
+        Field         = " ",
+        File          = " ",
+        Function      = "󰊕 ",
+        Interface     = " ",
+        Key           = " ",
+        Method        = "󰊕 ",
+        Module        = " ",
+        Namespace     = "󰦮 ",
+        Null          = " ",
+        Number        = "󰎠 ",
+        Object        = " ",
+        Operator      = " ",
+        Package       = " ",
+        Property      = " ",
+        String        = " ",
+        Struct        = "󰆼 ",
+        TypeParameter = " ",
+        Variable      = "󰀫 ",
+      },
+    },
+  },
+  cmd = "Trouble",
+  keys = {
+    {
+      "<leader>d",
+      "<cmd>Trouble diagnostics toggle<cr>",
+      desc = "Diagnostics (Trouble)",
+    },
+    {
+      "<leader>xX",
+      "<cmd>Trouble diagnostics toggle filter.buf=0<cr>",
+      desc = "Buffer Diagnostics (Trouble)",
+    },
+    {
+      "<leader>cs",
+      "<cmd>Trouble symbols toggle focus=true<cr>",
+      desc = "Symbols (Trouble)",
+    },
+    {
+      "<leader>cl",
+      "<cmd>Trouble lsp toggle focus=false win.position=right<cr>",
+      desc = "LSP Definitions / references / ... (Trouble)",
+    },
+    {
+      "<leader>xL",
+      "<cmd>Trouble loclist toggle<cr>",
+      desc = "Location List (Trouble)",
+    },
+    {
+      "<leader>xQ",
+      "<cmd>Trouble qflist toggle<cr>",
+      desc = "Quickfix List (Trouble)",
+    },
+  },
+}
+
 -- save cursor position
 vim.api.nvim_create_autocmd({ "BufReadPost" }, {
   pattern = "*",
@@ -959,6 +1294,37 @@ vim.api.nvim_create_autocmd("InsertLeave", {
   end,
 })
 
+local compileRun = function()
+  vim.cmd("w")
+  -- check file type
+  local ft = vim.bo.filetype
+  if ft == "go" then
+    require("nvterm.terminal").send("make", "vertical")
+    vim.cmd [[wincmd w]]
+    --[[ split()
+    vim.cmd("term make") ]]
+  end
+
+  if ft == "c" then
+    require("nvterm.terminal").send("m", "vertical")
+    vim.cmd [[wincmd w]]
+    --[[ split()
+    vim.cmd("term make") ]]
+  end
+end
+
+local compileRunTest = function()
+  vim.cmd("w")
+  -- check file type
+  local ft = vim.bo.filetype
+  if ft == "go" then
+    require("nvterm.terminal").send("make test", "vertical")
+    vim.cmd [[wincmd w]]
+    --[[ split()
+    vim.cmd("term make") ]]
+  end
+end
+
 -- pre-keymap
 vim.keymap.set("n", "s", "<nop>", m)
 vim.keymap.set("n", "S", ":w<cr>", m)
@@ -992,21 +1358,37 @@ vim.keymap.set({ "n", "v" }, "H", "0", m)
 vim.keymap.set({ "n", "v" }, "L", "$", m)
 vim.keymap.set("n", "<esc>", ":nohlsearch<cr>", m)
 vim.keymap.set("n", "<c-s>", "*N", m)
-vim.keymap.set("n", "<leader>fm", function()
-  vim.lsp.buf.format { async = true }
-end, m)
-vim.keymap.set("n", "<leader>in", function()
-  require('lsp-inlayhints').toggle()
-end, m)
+vim.keymap.set("n", "<leader>fm", function() vim.lsp.buf.format { async = true } end, m)
+vim.keymap.set("n", "<leader>in", function() require('lsp-inlayhints').toggle() end, m)
 vim.keymap.set("n", "<leader>h", ":%!xxd -a -u -g 2 -e<cr>")
+vim.keymap.set("n", "<leader>z", function() require("zen-mode").toggle({ window = { width = .6 } }) end, m)
+vim.keymap.set('n', 'rr', compileRun, { silent = true })
+vim.keymap.set('n', 'rt', compileRunTest, { silent = true })
+vim.keymap.set('n', '<leader>o', ":SymbolsOutline<cr>", { silent = true })
+vim.keymap.set('n', '<leader>xx', "<cmd>source %<cr>", { silent = true })
+vim.keymap.set('n', '<leader>x', ":.lua<cr>", { silent = true })
+vim.keymap.set('v', '<leader>x', ":lua<cr>", { silent = true })
 
-P = function(v)
-  print(vim.inspect(v))
-  return v
-end
+local myPlugin = {
+  "test.nvim",
+  dir = "~/Workspace/code/lua/nvim-plugins/test.nvim",
+  config = function()
+    vim.keymap.set("n", ";t", function()
+      require("test").open_floating_window()
+    end)
+  end,
+}
 
 
 require("lazy").setup({
+  -- myPlugin,
+  trouble,
+  colorizer,
+  luasnip,
+  tags,
+  zen,
+  logHL,
+  flutter,
   treesitter,
   deus,
   telescope,
@@ -1024,45 +1406,9 @@ require("lazy").setup({
   wilder,
   dap,
   dropbar,
-  {
-    "test.nvim",
-    dir = "/home/stan/Workspace/code/lua/nvim-plugins/test.nvim",
-    config = function()
-      vim.keymap.set("n", ";t", function()
-        require("test").test()
-      end)
-    end,
-  },
   iw,
+  outline,
+  nio,
 })
 
---[[ local split = function()
-  vim.cmd("set splitbelow")
-  vim.cmd("sp")
-  vim.cmd("res -5")
-end ]]
-local compileRun = function()
-  vim.cmd("w")
-  -- check file type
-  local ft = vim.bo.filetype
-  if ft == "go" then
-    require("nvterm.terminal").send("make", "vertical")
-    vim.cmd [[wincmd w]]
-    --[[ split()
-    vim.cmd("term make") ]]
-  end
-end
-local compileRunTest = function()
-  vim.cmd("w")
-  -- check file type
-  local ft = vim.bo.filetype
-  if ft == "go" then
-    require("nvterm.terminal").send("make test", "vertical")
-    vim.cmd [[wincmd w]]
-    --[[ split()
-    vim.cmd("term make") ]]
-  end
-end
-
-vim.keymap.set('n', 'rr', compileRun, { silent = true })
-vim.keymap.set('n', 'rt', compileRunTest, { silent = true })
+-- vim.cmd("highlight Normal guibg=none")
