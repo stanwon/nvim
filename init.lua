@@ -446,12 +446,15 @@ local treesitter = {
     local configs = require("nvim-treesitter.configs")
     configs.setup({
       -- ensure_installed = { "query", "lua", "go" },
-      ensure_installed = { "lua", "go", "c" },
+      ensure_installed = { "lua", "go", "c", "html" },
       highlight = {
         enable = true,
         -- use_languagetree = true,
       },
       indent = { enable = false },
+      -- autotag = {
+        -- enable = true,
+      -- },
     })
   end,
 }
@@ -500,6 +503,7 @@ local lsp = {
     "hrsh7th/cmp-vsnip",
     "hrsh7th/vim-vsnip",
     "simrat39/inlay-hints.nvim",
+    -- "Jezda1337/nvim-html-css",
     {
       "lvimuser/lsp-inlayhints.nvim",
       branch = "anticonceal",
@@ -507,6 +511,7 @@ local lsp = {
   },
   config = function()
     -- cmp
+    -- require("html-css"):setup()
     local cmp = require("cmp")
     cmp.setup({
       preselect = cmp.PreselectMode.None,
@@ -529,6 +534,39 @@ local lsp = {
             { "│", "CmpBorder" },
           },
         },
+      },
+      --[[ sources = {
+        { name = "nvim_lsp" },
+        { name = "vsnip" },
+        { name = "nvim_lua" },
+        { name = "path" },
+        { name = "buffer" },
+        {
+          name = "html-css",
+          option = {
+            max_count = {}, -- not ready yet
+            enable_on = {
+              "html"
+            },                                   -- set the file types you want the plugin to work on
+            file_extensions = { "css", "sass", "less" }, -- set the local filetypes from which you want to derive classes
+            style_sheets = {
+              -- example of remote styles, only css no js for now
+              "https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css",
+              "https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css",
+            }
+          }
+        },
+      }, ]]
+      formatting = {
+        format = function(entry, vim_item)
+          local source = entry.source.name
+          local kind = vim_item.kind
+
+          if source == "html-css" then
+            source_mapping["html-css"] = entry.completion_item.menu
+          end
+          return vim_item
+        end
       },
       sources = cmp.config.sources({
         { name = "nvim_lsp" },
@@ -553,6 +591,21 @@ local lsp = {
             -- Prioritize searching result for current buffer.
             current_buffer_only = false,
           },
+        -- { name = "html-css" },
+        {
+          name = "html-css",
+          option = {
+            max_count = {}, -- not ready yet
+            enable_on = {
+              "html"
+            },                                           -- set the file types you want the plugin to work on
+            file_extensions = { "css", "sass", "less" }, -- set the local filetypes from which you want to derive classes
+            style_sheets = {
+              -- example of remote styles, only css no js for now
+              "https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css",
+              "https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css",
+            }
+          }
         },
       }, {
         { name = "buffer" },
@@ -602,7 +655,7 @@ local lsp = {
     -- lspconfig
     local capabilities = require("cmp_nvim_lsp").default_capabilities()
     local lspconfig = require("lspconfig")
-    local servers = { "lua_ls", "gopls", "clangd" }
+    local servers = { "lua_ls", "gopls", "clangd", "html" }
     for _, lsp in ipairs(servers) do
       lspconfig[lsp].setup({
         capabilities = capabilities,
@@ -1412,3 +1465,25 @@ require("lazy").setup({
 })
 
 -- vim.cmd("highlight Normal guibg=none")
+  -- autotag,
+})
+
+--[[ local split = function()
+  vim.cmd("set splitbelow")
+  vim.cmd("sp")
+  vim.cmd("res -5")
+end ]]
+local compileRun = function()
+  vim.cmd("w")
+  -- check file type
+  local ft = vim.bo.filetype
+  if ft == "go" then
+    require("nvterm.terminal").send("make", "vertical")
+    vim.cmd [[wincmd w]]
+    --[[ split()
+    vim.cmd("term make") ]]
+  end
+end
+
+vim.keymap.set('n', 'r', compileRun, { silent = true })
+vim.cmd("highlight Normal guibg=none")
