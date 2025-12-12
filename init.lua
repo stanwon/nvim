@@ -6,3 +6,9 @@ require('stan.ls.lua_ls')
 
 vim.cmd [[colorscheme unokai]]
 
+vim.api.nvim_create_autocmd('VimEnter', {
+    pattern = "*",
+    callback = function()
+        vim.cmd [[Yazi]]
+    end,
+})
