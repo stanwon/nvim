@@ -7,3 +7,4 @@ require('stan.personal')
 
 require('stan.aerial').setup()
 require('stan.gitsigns')
+require('stan.telescope')
