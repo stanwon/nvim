@@ -6,3 +6,4 @@ require('stan.lsp.lua_ls')
 require('stan.personal')
 
 require('stan.aerial').setup()
+require('stan.gitsigns')
