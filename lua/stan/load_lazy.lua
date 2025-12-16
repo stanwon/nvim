@@ -22,6 +22,7 @@ require("lazy").setup({
         require("stan.trouble"),
         require("stan.aerial"),
         "neovim/nvim-lspconfig",
+        "SmiteshP/nvim-navic",
         "lewis6991/gitsigns.nvim",
         { 'akinsho/toggleterm.nvim', version = "*", config = true },
         {
