@@ -21,6 +21,7 @@ require("lazy").setup({
         require("stan.yazi"),
         require("stan.trouble"),
         require("stan.aerial"),
+        require("stan.lazygit"),
         "neovim/nvim-lspconfig",
         "SmiteshP/nvim-navic",
         "lewis6991/gitsigns.nvim",
