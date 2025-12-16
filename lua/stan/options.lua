@@ -1,5 +1,9 @@
 vim.g.mapleader = " "
 
+vim.o.foldlevel = 3
+vim.o.foldlevelstart = 3
+vim.wo.foldmethod = 'expr'
+vim.wo.foldexpr = 'v:lua.vim.treesitter.foldexpr()'
 vim.o.splitbelow = true
 vim.o.splitright = true
 vim.o.showmode = false
