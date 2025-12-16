@@ -34,6 +34,9 @@ vim.lsp.config('lua_ls', {
     end,
     settings = {
         Lua = {
+            diagnostics = {
+                globals = { "vim" }
+            },
         }
     }
 })

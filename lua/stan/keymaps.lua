@@ -23,6 +23,7 @@ vim.keymap.set('n', 'gD', ':lua vim.lsp.buf.declaration()<cr>', opts)
 vim.keymap.set('n', '<leader>fm', ':lua vim.lsp.buf.format()<cr>', opts)
 
 -- other
+--vim.keymap.set('n', '<leader>j', ':lua vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())<cr>', opts)
 vim.keymap.set('n', 'S', ':write<cr>', opts)
 vim.keymap.set('n', 'Q', ':quit<cr>', opts)
 vim.keymap.set('n', 's', '<nop>', opts)
