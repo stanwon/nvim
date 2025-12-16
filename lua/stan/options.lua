@@ -13,7 +13,8 @@ vim.o.wrap = true
 vim.o.autoindent = true
 vim.o.termguicolors = true
 vim.o.listchars = "tab:> ,trail:▫"
-vim.o.winbar = "%{%v:lua.require'nvim-navic'.get_location()%}"
+--vim.o.winbar = "%{%v:lua.require'nvim-navic'.get_location()%}"
+vim.o.statusline = "%{%v:lua.require'nvim-navic'.get_location()%}"
 
 vim.o.expandtab = true
 vim.o.tabstop = 4
