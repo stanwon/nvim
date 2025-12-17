@@ -1,7 +1,7 @@
 vim.g.mapleader = " "
 
-vim.o.foldlevel = 3
-vim.o.foldlevelstart = 3
+vim.o.foldlevel = 5
+vim.o.foldlevelstart = 5
 vim.wo.foldmethod = 'expr'
 vim.wo.foldexpr = 'v:lua.vim.treesitter.foldexpr()'
 vim.o.splitbelow = true
@@ -18,7 +18,7 @@ vim.o.autoindent = true
 vim.o.termguicolors = true
 vim.o.listchars = "tab:> ,trail:▫"
 vim.o.winbar = "%{%v:lua.require'nvim-navic'.get_location()%}"
-vim.o.statusline = "%{%v:lua.require'nvim-navic'.get_location()%}"
+--vim.o.statusline = "%{%v:lua.require'nvim-navic'.get_location()%}"
 
 vim.o.expandtab = true
 vim.o.tabstop = 4
