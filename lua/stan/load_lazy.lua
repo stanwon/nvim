@@ -16,24 +16,41 @@ vim.opt.rtp:prepend(lazypath)
 
 vim.g.mapleader = " "
 
-require("lazy").setup({
-    spec = {
-        require("stan.yazi"),
-        require("stan.trouble"),
-        require("stan.aerial"),
-        require("stan.lazygit"),
-        "folke/zen-mode.nvim",
-        "neovim/nvim-lspconfig",
-        "SmiteshP/nvim-navic",
-        "lewis6991/gitsigns.nvim",
-        { 'akinsho/toggleterm.nvim', version = "*", config = true },
-        {
-            'nvim-telescope/telescope.nvim',
-            tag = 'v0.2.0',
-            dependencies = { 'nvim-lua/plenary.nvim' }
+if (vim.g.vscode == nil) then
+    require("lazy").setup({
+        spec = {
+            require("stan.yazi"),
+            require("stan.trouble"),
+            require("stan.aerial"),
+            require("stan.lazygit"),
+            require("stan.imselect"),
+            "folke/zen-mode.nvim",
+            "neovim/nvim-lspconfig",
+            "SmiteshP/nvim-navic",
+            "lewis6991/gitsigns.nvim",
+            { 'akinsho/toggleterm.nvim', version = "*", config = true },
+            {
+                'nvim-telescope/telescope.nvim',
+                tag = 'v0.2.0',
+                dependencies = { 'nvim-lua/plenary.nvim' }
+            },
         },
-    },
 
-    install = { colorscheme = { "habamax" } },
-    checker = { enabled = true },
-})
+        install = { colorscheme = { "habamax" } },
+        checker = { enabled = true },
+    })
+else
+    require("lazy").setup({
+        spec = {
+            require("stan.imselect"),
+            {
+                'nvim-telescope/telescope.nvim',
+                tag = 'v0.2.0',
+                dependencies = { 'nvim-lua/plenary.nvim' }
+            },
+        },
+
+        install = { colorscheme = { "habamax" } },
+        checker = { enabled = true },
+    })
+end

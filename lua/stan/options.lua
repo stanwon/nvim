@@ -17,7 +17,9 @@ vim.o.wrap = true
 vim.o.autoindent = true
 vim.o.termguicolors = true
 vim.o.listchars = "tab:> ,trail:▫"
+if (vim.g.vscode == nil) then
 vim.o.winbar = "%{%v:lua.require'nvim-navic'.get_location()%}"
+end
 --vim.o.statusline = "%{%v:lua.require'nvim-navic'.get_location()%}"
 
 vim.o.expandtab = true

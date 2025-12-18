@@ -18,9 +18,11 @@ vim.keymap.set('n', 'tl', ':tabprevious<cr>', opts)
 
 -- code
 vim.keymap.set('n', 'gr', ':lua vim.lsp.buf.references()<cr>', opts)
-vim.keymap.set('n', 'gd', ':lua vim.lsp.buf.definition()<cr>', opts)
-vim.keymap.set('n', 'gD', ':lua vim.lsp.buf.declaration()<cr>', opts)
+opts = { noremap = true, buffer = vim.api.nvim_get_current_buf() }
+vim.keymap.set('n', 'gd', ':lua vim.lsp.buf.definition({reuse_win = true})<cr>', opts)
+vim.keymap.set('n', 'gD', ':lua vim.lsp.buf.declaration({reuse_win = true})<cr>', opts)
 vim.keymap.set('n', '<leader>fm', ':lua vim.lsp.buf.format()<cr>', opts)
+opts = { noremap = true }
 
 -- other
 --vim.keymap.set('n', '<leader>j', ':lua vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())<cr>', opts)
