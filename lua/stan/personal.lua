@@ -1,4 +1,4 @@
-vim.cmd [[colorscheme unokai]]
+vim.cmd [[colorscheme everforest]]
 
 vim.api.nvim_create_autocmd('VimEnter', {
     pattern = "*",
