@@ -27,6 +27,7 @@ require("lazy").setup({
         require("stan.indent-blankline"),
         require("stan.telescope"),
         require("stan.navic"),
+        require("stan.blink"),
         "neanias/everforest-nvim",
         "neovim/nvim-lspconfig",
         { 'akinsho/toggleterm.nvim', version = "*", config = true },
