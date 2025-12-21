@@ -33,7 +33,7 @@ local M = {
         end,
     },
     config = function(_, opts)
-        vim.keymap.set('n', '<leader>z', function()require('zen-mode').toggle(opts)end, { noremap = true })
+        vim.keymap.set('n', '<leader><space>', function()require('zen-mode').toggle(opts)end, { noremap = true })
     end
 }
 
