@@ -28,7 +28,7 @@ vim.keymap.set('n', 'S', ':write<cr>', opts)
 vim.keymap.set('n', 'Q', ':quit<cr>', opts)
 vim.keymap.set('n', 's', '<nop>', opts)
 vim.keymap.set('n', 'x', '<nop>', opts)
-vim.keymap.set({ 'n', 'v' }, '<esc>', ':nohlsearch<cr>', opts)
+vim.keymap.set('n', '<esc>', ':nohlsearch<cr>', opts)
 
 -- plugins
 vim.keymap.set('n', '<leader>v', ':ToggleTerm<cr>', opts)
