@@ -23,7 +23,8 @@ local M = {
     },
     -- Optional dependencies
     dependencies = {
-        "nvim-treesitter/nvim-treesitter",
+        -- 重写版在 main 分支（master 已锁定，旧版与 nvim 0.12 的 iter_matches 格式不兼容，会崩）
+        { "nvim-treesitter/nvim-treesitter", branch = "main" },
         "nvim-tree/nvim-web-devicons"
     },
 }
