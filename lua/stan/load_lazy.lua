@@ -18,20 +18,9 @@ vim.g.mapleader = " "
 
 require("lazy").setup({
     spec = {
-        require("stan.yazi"),
-        require("stan.trouble"),
-        require("stan.aerial"),
-        require("stan.lazygit"),
-        require("stan.gitsigns"),
-        require("stan.zen"),
-        require("stan.indent-blankline"),
-        require("stan.telescope"),
-        require("stan.navic"),
-        require("stan.blink"),
-        --require("stan.ai"),
-        "neanias/everforest-nvim",
-        "neovim/nvim-lspconfig",
-        { 'akinsho/toggleterm.nvim', version = "*", config = true, event = "VeryLazy" },
+        -- 自动加载 lua/stan/plugins/ 下所有插件 spec
+        -- 新增插件 = 往该目录丢一个文件，这里永远不用改
+        { import = "stan.plugins" },
     },
 
     install = { colorscheme = { "habamax" } },

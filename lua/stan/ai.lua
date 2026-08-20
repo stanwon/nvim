@@ -1,6 +1,6 @@
--- ⚠️ 已禁用：本文件未在 load_lazy.lua 中加载（require("stan.ai") 已注释）
+-- ⚠️ 已禁用：本文件位于 lua/stan/（而非 lua/stan/plugins/），lazy 的 import 机制不会加载它。
 -- 原因：hints/completion 的 insert_result_key = '<S-Tab>' 与 blink.cmp 的 <S-Tab> 键位冲突。
--- 如需启用：先改掉这里的 <S-Tab>，再取消 load_lazy.lua 中的注释。
+-- 如需启用：先改掉这里的 <S-Tab>，再把本文件移动到 lua/stan/plugins/ai.lua 即可生效。
 local M = {
     'kiddos/gemini.nvim',
     opts = {
