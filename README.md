@@ -49,6 +49,8 @@
 | `<leader>fg` | 全文搜索（live grep） |
 | `<leader>fb` | 切换缓冲区 |
 | `<leader>fh` | 搜索帮助文档 |
+| `<leader>fk` | 查找键位 |
+| `<leader>gs` | Git 变更文件（模糊搜索） |
 
 ### 🩹 Trouble — 诊断 / 列表（`lua/stan/plugins/trouble.lua`）
 
@@ -89,12 +91,17 @@
 | `<leader>-` | n / v | 在当前文件位置打开 Yazi |
 | `<leader>cw` | n | 在 nvim 工作目录打开 |
 | `<C-up>` | n | 恢复上次的 Yazi 会话 |
+| `<Esc>` | t | 退出 Yazi（发送 q 给进程） |
 
 ### 🧘 其他插件
 
 | 键位 | 插件 | 作用 | 位置 |
 |------|------|------|------|
-| `<leader>lg` | LazyGit | 打开 LazyGit | `plugins/lazygit.lua` |
+| `<leader>lg` | LazyGit | 打开 LazyGit（`<Esc>` 退出） | `plugins/lazygit.lua` |
+| `<leader>gd` | Diffview | Git 变更面板（文件列表+diff，回车跳转） | `plugins/diffview.lua` |
+| `<leader>gD` | Diffview | 关闭变更面板 | `plugins/diffview.lua` |
+| `<leader>gf` | Diffview | Git 文件历史 | `plugins/diffview.lua` |
+| `<leader>m` | Render-Markdown | 开关 Markdown 渲染（默认关闭） | `plugins/render-markdown.lua` |
 | `<leader>a` | Aerial | 开关符号侧边栏 | `plugins/aerial.lua` |
 | `<leader><space>` | Zen | 开关专注模式 | `plugins/zen.lua` |
 | `<leader>v` | ToggleTerm | 开关终端 | `keymaps.lua` |
@@ -113,10 +120,11 @@
 
 | 前缀 | 类别 |
 |------|------|
-| `<leader>h*` | Git 操作（Gitsigns） |
+| `<leader>h*` | Git hunk 操作（Gitsigns） |
+| `<leader>g*` | Git 面板 / 历史（Diffview） |
 | `<leader>x*` | 诊断 / 列表（Trouble） |
 | `<leader>c*` | 符号 / LSP 跳转（Trouble） |
-| `<leader>f*` | 查找（Telescope） |
+| `<leader>f*` | 查找（Telescope：文件/全文/键位/Git 变更） |
 | `<leader>t*` | 开关类（blame / word-diff） |
 | `g*` | LSP 跳转 + 窗口移动 |
 | `s*` | 分屏 |
@@ -139,3 +147,5 @@ lua/stan/
 
 > 插件启用状态：lazy.nvim 会自动加载 `lua/stan/plugins/` 下所有文件。
 > 新增插件：在 `plugins/` 目录新建一个返回 spec 的 `.lua` 文件即可，无需修改其他文件。
+> 插件清单（21 个）：yazi, trouble, aerial, lazygit, gitsigns, zen, indent-blankline, telescope,
+> navic, blink, everforest, lspconfig, toggleterm, which-key, render-markdown, diffview

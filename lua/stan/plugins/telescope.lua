@@ -9,6 +9,7 @@ local M = {
         { '<leader>fb', '<cmd>Telescope buffers<cr>', desc = '切换缓冲区' },
         { '<leader>fh', '<cmd>Telescope help_tags<cr>', desc = '搜索帮助文档' },
         { '<leader>fk', '<cmd>Telescope keymaps<cr>', desc = '查找键位' },
+        { '<leader>gs', '<cmd>Telescope git_status<cr>', desc = 'Git 变更文件' },
     }
 }
 
