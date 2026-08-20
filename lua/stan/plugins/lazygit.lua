@@ -16,5 +16,14 @@ return {
     -- order to load the plugin when the command is run for the first time
     keys = {
         { "<leader>lg", "<cmd>LazyGit<cr>", desc = "打开 LazyGit" }
-    }
+    },
+    config = function()
+        -- 按 <Esc> 退出 lazygit（发送 q 给 lazygit 进程，替代默认的 q 键）
+        vim.api.nvim_create_autocmd('FileType', {
+            pattern = 'lazygit',
+            callback = function()
+                vim.keymap.set('t', '<Esc>', 'q', { buffer = true, desc = '退出 lazygit' })
+            end,
+        })
+    end,
 }
