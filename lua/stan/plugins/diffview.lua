@@ -30,6 +30,10 @@ return {
                 -- <Esc> 关闭变更面板
                 { "n", "<esc>", "<cmd>DiffviewClose<cr>", { desc = "关闭变更面板" } },
             },
+            file_history_panel = {
+                -- 文件历史面板内 <Esc> 关闭文件历史
+                { "n", "<esc>", "<cmd>DiffviewClose<cr>", { desc = "关闭文件历史" } },
+            },
         },
     },
     config = function(_, opts)

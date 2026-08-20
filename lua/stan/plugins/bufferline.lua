@@ -24,6 +24,12 @@ return {
             indicator = { style = "icon", icon = "▎" },
             modified_icon = "●",
             diagnostics = "nvim_lsp",
+            -- 只显示当前有窗口的 buffer（跨所有 tab 检测）：
+            -- :q 关闭窗口后，该 buffer 的标签自动消失（VSCode 式行为）
+            -- 隐藏的 buffer 仍可用 <leader>fb 切换回来
+            custom_filter = function(bufnr)
+                return #vim.fn.win_findbuf(bufnr) > 0
+            end,
         },
     },
 }
