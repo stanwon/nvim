@@ -34,7 +34,7 @@ local M = {
         end,
     },
     config = function(_, opts)
-        vim.keymap.set('n', '<leader><space>', function()require('zen-mode').toggle(opts)end, { noremap = true })
+        vim.keymap.set('n', '<leader><space>', function()require('zen-mode').toggle(opts)end, { noremap = true, desc = '开关专注模式' })
     end
 }
 

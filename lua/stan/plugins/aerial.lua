@@ -7,7 +7,7 @@ local M = {
         -- optionally use on_attach to set keymaps when aerial has attached to a buffer
         on_attach = function(bufnr)
             -- 仅保留打开/关闭侧边栏的映射，且限定在当前 buffer
-            vim.keymap.set("n", "<leader>a", "<cmd>AerialToggle!<CR>", { buffer = bufnr })
+            vim.keymap.set("n", "<leader>a", "<cmd>AerialToggle!<CR>", { buffer = bufnr, desc = "开关符号侧边栏" })
         end,
         filter_kind = {
             "Class",

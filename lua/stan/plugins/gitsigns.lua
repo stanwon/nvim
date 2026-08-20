@@ -53,10 +53,8 @@ local M = {
         on_attach                    = function(bufnr)
             local gitsigns = require('gitsigns')
 
-            local function map(mode, l, r, opts)
-                opts = opts or {}
-                opts.buffer = bufnr
-                vim.keymap.set(mode, l, r, opts)
+            local function map(mode, l, r, desc)
+                vim.keymap.set(mode, l, r, { buffer = bufnr, desc = desc })
             end
 
             -- Navigation
@@ -66,7 +64,7 @@ local M = {
                 else
                     gitsigns.nav_hunk('next')
                 end
-            end)
+            end, '下一个 hunk')
 
             map('n', '[c', function()
                 if vim.wo.diff then
@@ -74,44 +72,44 @@ local M = {
                 else
                     gitsigns.nav_hunk('prev')
                 end
-            end)
+            end, '上一个 hunk')
 
             -- Actions
-            map('n', '<leader>hs', gitsigns.stage_hunk)
-            map('n', '<leader>hr', gitsigns.reset_hunk)
+            map('n', '<leader>hs', gitsigns.stage_hunk, '暂存 hunk')
+            map('n', '<leader>hr', gitsigns.reset_hunk, '还原 hunk')
 
             map('v', '<leader>hs', function()
                 gitsigns.stage_hunk({ vim.fn.line('.'), vim.fn.line('v') })
-            end)
+            end, '暂存选中的 hunk')
 
             map('v', '<leader>hr', function()
                 gitsigns.reset_hunk({ vim.fn.line('.'), vim.fn.line('v') })
-            end)
+            end, '还原选中的 hunk')
 
-            map('n', '<leader>hS', gitsigns.stage_buffer)
-            map('n', '<leader>hR', gitsigns.reset_buffer)
-            map('n', '<leader>hp', gitsigns.preview_hunk)
-            map('n', '<leader>hi', gitsigns.preview_hunk_inline)
+            map('n', '<leader>hS', gitsigns.stage_buffer, '暂存整个文件')
+            map('n', '<leader>hR', gitsigns.reset_buffer, '还原整个文件')
+            map('n', '<leader>hp', gitsigns.preview_hunk, '预览 hunk')
+            map('n', '<leader>hi', gitsigns.preview_hunk_inline, '内联预览 hunk')
 
             map('n', '<leader>hb', function()
                 gitsigns.blame_line({ full = true })
-            end)
+            end, '查看行 blame')
 
-            map('n', '<leader>hd', gitsigns.diffthis)
+            map('n', '<leader>hd', gitsigns.diffthis, 'diff 当前文件')
 
             map('n', '<leader>hD', function()
                 gitsigns.diffthis('~')
-            end)
+            end, '与 HEAD~1 比较')
 
-            map('n', '<leader>hQ', function() gitsigns.setqflist('all') end)
-            map('n', '<leader>hq', gitsigns.setqflist)
+            map('n', '<leader>hQ', function() gitsigns.setqflist('all') end, '全部 hunk 加入列表')
+            map('n', '<leader>hq', gitsigns.setqflist, '当前文件 hunk 加入列表')
 
             -- Toggles
-            map('n', '<leader>tb', gitsigns.toggle_current_line_blame)
-            map('n', '<leader>tw', gitsigns.toggle_word_diff)
+            map('n', '<leader>tb', gitsigns.toggle_current_line_blame, '开关行 blame')
+            map('n', '<leader>tw', gitsigns.toggle_word_diff, '开关单词级 diff')
 
             -- Text object
-            map({ 'o', 'x' }, 'ih', gitsigns.select_hunk)
+            map({ 'o', 'x' }, 'ih', gitsigns.select_hunk, '选中整个 hunk')
         end
     }
 }

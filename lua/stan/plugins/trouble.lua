@@ -6,32 +6,32 @@ local M = {
         {
             "<leader>xx",
             "<cmd>Trouble diagnostics toggle<cr>",
-            desc = "Diagnostics (Trouble)",
+            desc = "诊断列表",
         },
         {
             "<leader>xX",
             "<cmd>Trouble diagnostics toggle filter.buf=0<cr>",
-            desc = "Buffer Diagnostics (Trouble)",
+            desc = "当前缓冲区诊断",
         },
         {
             "<leader>cs",
             "<cmd>Trouble symbols toggle focus=false<cr>",
-            desc = "Symbols (Trouble)",
+            desc = "符号列表",
         },
         {
             "<leader>cl",
             "<cmd>Trouble lsp toggle focus=false win.position=right<cr>",
-            desc = "LSP Definitions / references / ... (Trouble)",
+            desc = "LSP 定义/引用列表",
         },
         {
             "<leader>xL",
             "<cmd>Trouble loclist toggle<cr>",
-            desc = "Location List (Trouble)",
+            desc = "位置列表",
         },
         {
             "<leader>xQ",
             "<cmd>Trouble qflist toggle<cr>",
-            desc = "Quickfix List (Trouble)",
+            desc = "快速修复列表",
         },
     },
 }
