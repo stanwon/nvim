@@ -11,6 +11,7 @@ local M = {
     'saghen/blink.cmp',
     dependencies = { 'rafamadriz/friendly-snippets' },
     version = '1.*',
+    event = 'VeryLazy',
     opts = {
         keymap = {
             preset = 'default',

@@ -1,6 +1,7 @@
 local M = {
     "folke/zen-mode.nvim",
     main = "zen-mode",
+    event = "VeryLazy",
     opts = {
         window = {
             backdrop = 0.95,

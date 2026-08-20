@@ -13,8 +13,8 @@ vim.keymap.set('n', 'gk', ':wincmd k<cr>', opts)
 vim.keymap.set('n', 'gj', ':wincmd j<cr>', opts)
 
 -- move cursor around the tabs
-vim.keymap.set('n', 'th', ':tabNext<cr>', opts)
-vim.keymap.set('n', 'tl', ':tabprevious<cr>', opts)
+vim.keymap.set('n', 'th', ':tabprevious<cr>', opts)
+vim.keymap.set('n', 'tl', ':tabnext<cr>', opts)
 
 -- code
 vim.keymap.set('n', 'gr', ':lua vim.lsp.buf.references()<cr>', opts)

@@ -1,14 +1,13 @@
 local M = {
     'stevearc/aerial.nvim',
     main = "aerial",
+    event = "VeryLazy",
     opts = {
         backends = { "lsp", "treesitter", "markdown", "asciidoc", "man" },
         -- optionally use on_attach to set keymaps when aerial has attached to a buffer
         on_attach = function(bufnr)
-            -- Jump forwards/backwards with '{' and '}'
-            vim.keymap.set("n", "{", "<cmd>AerialPrev<CR>", { buffer = bufnr })
-            vim.keymap.set("n", "}", "<cmd>AerialNext<CR>", { buffer = bufnr })
-            vim.keymap.set("n", "<leader>a", "<cmd>AerialToggle!<CR>")
+            -- 仅保留打开/关闭侧边栏的映射，且限定在当前 buffer
+            vim.keymap.set("n", "<leader>a", "<cmd>AerialToggle!<CR>", { buffer = bufnr })
         end,
         filter_kind = {
             "Class",

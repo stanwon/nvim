@@ -31,7 +31,7 @@ require("lazy").setup({
         --require("stan.ai"),
         "neanias/everforest-nvim",
         "neovim/nvim-lspconfig",
-        { 'akinsho/toggleterm.nvim', version = "*", config = true },
+        { 'akinsho/toggleterm.nvim', version = "*", config = true, event = "VeryLazy" },
     },
 
     install = { colorscheme = { "habamax" } },
