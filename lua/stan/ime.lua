@@ -1,17 +1,14 @@
 -- 远程 nvim 输入法自动切换（配合 Windows 端 im-server.ps1 使用）
 -- 原理：SSH 反向端口转发 4455 -> Windows 本地监听服务
---   InsertLeave(按 Esc) -> 切回英文 (1033)
---   InsertEnter(按 i)   -> 恢复上一次的非英文输入法（如 2052 中文）
--- 上次输入法持久化到文件，跨 nvim 会话也有效
-
-local M = {}
+-- 行为：
+--   离开插入/命令行模式（按 Esc）-> 切回英文 (1033)
+--   进入插入模式 -> 不做任何切换（保持当前输入法）
 
 local BRIDGE_URL = os.getenv("IME_BRIDGE_URL") or "http://127.0.0.1:4455"
 local EN_US = "1033" -- en-US；若你的英文键盘语言不是 1033，用 im-select.exe 查一下改这里
-local STATE_FILE = vim.fn.stdpath("cache") .. "/ime_last"
 local DEBUG_FILE = "/tmp/ime_debug.log"
 
--- 调试日志（排查问题时用，可保留）
+-- 调试日志（排查问题时用）
 local function dbg(...)
   local parts = {}
   for _, v in ipairs({ ... }) do
@@ -42,42 +39,14 @@ local function set_im(im)
   vim.fn.system("curl -s --noproxy '*' --max-time 2 -o /dev/null " .. BRIDGE_URL .. "/set/" .. im)
 end
 
-function M.get_im()
-  local im = http_get("get")
-  return im ~= "" and im or nil
-end
-
-function M.set_im(im)
-  set_im(im)
-end
-
 local function is_en(im)
   return im == EN_US
 end
 
--- 持久化: 读写上次的非英文输入法
-local function load_last()
-  local f = io.open(STATE_FILE, "r")
-  if f then
-    local v = f:read("*a")
-    f:close()
-    return v:gsub("[%s\r\n]", "")
-  end
-  return nil
-end
-
-local function save_last(im)
-  local f = io.open(STATE_FILE, "w")
-  if f then
-    f:write(im)
-    f:close()
-  end
-end
-
--- 离开插入/命令行模式：记住当前非英文输入法，切回英文
+-- 离开插入/命令行模式：切回英文
 local function on_leave(event)
-  local im = M.get_im()
-  if not im then
+  local im = http_get("get")
+  if im == "" then
     dbg(event, "get failed, skip")
     return
   end
@@ -85,30 +54,8 @@ local function on_leave(event)
     dbg(event, "im=", im, "already EN, nothing to do")
     return
   end
-  vim.g.ime_last = im
-  save_last(im)
-  M.set_im(EN_US)
-  dbg(event, "im=", im, "remembered+persisted, switched to EN")
-end
-
--- 进入插入/命令行模式：若当前是英文且上次有非英文输入法，则恢复
-local function on_enter(event)
-  local im = M.get_im()
-  if not im then
-    dbg(event, "get failed, skip")
-    return
-  end
-  if not is_en(im) then
-    dbg(event, "im=", im, "not EN, keep as is")
-    return
-  end
-  local last = vim.g.ime_last or load_last()
-  if last and not is_en(last) then
-    M.set_im(last)
-    dbg(event, "im=", im, "restore last=", last)
-  else
-    dbg(event, "im=", im, "last=", vim.inspect(last), "nothing to restore")
-  end
+  set_im(EN_US)
+  dbg(event, "im=", im, "switched to EN")
 end
 
 local group = vim.api.nvim_create_augroup("ImeSwitch", { clear = true })
@@ -118,11 +65,3 @@ vim.api.nvim_create_autocmd({ "InsertLeave", "CmdlineLeave" }, {
     on_leave(e.event)
   end,
 })
-vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter" }, {
-  group = group,
-  callback = function(e)
-    on_enter(e.event)
-  end,
-})
-
-return M
