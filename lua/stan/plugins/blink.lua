@@ -35,7 +35,7 @@ local M = {
 
         completion = {
             menu = { enabled = true },
-            list = { selection = { preselect = true }, cycle = { from_top = true } },
+            list = { selection = { preselect = false }, cycle = { from_top = true } },
             documentation = { auto_show = false }
         },
 

@@ -16,7 +16,7 @@ vim.keymap.set('n', 'tl', ':tabnext<cr>', { noremap = true, desc = '下一个标
 
 -- 代码
 vim.keymap.set('n', 'gr', ':lua vim.lsp.buf.references()<cr>', { noremap = true, desc = 'LSP 查找引用' })
-vim.keymap.set('n', 'gd', ':lua vim.lsp.buf.definition()<cr>', { noremap = true, desc = 'LSP 跳转定义' })
+-- vim.keymap.set('n', 'gd', ':lua vim.lsp.buf.definition()<cr>', { noremap = true, desc = 'LSP 跳转定义' })
 vim.keymap.set('n', 'gD', ':lua vim.lsp.buf.declaration()<cr>', { noremap = true, desc = 'LSP 跳转声明' })
 vim.keymap.set('n', '<leader>fm', ':lua vim.lsp.buf.format()<cr>', { noremap = true, desc = '格式化代码' })
 
