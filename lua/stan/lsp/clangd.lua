@@ -4,11 +4,12 @@ vim.lsp.config('clangd', {
         local args = { 'clangd', '--background-index' }
         -- 只在常见构建目录存在 compile_commands.json 时才指定，
         -- 否则交给 clangd 自己探测（Makefile 等项目不受影响）
+        -- 注意：--compile-commands-dir 必须用绝对路径（相对路径按 clangd 启动目录解析）
         local root = vim.fs.root(0, { 'compile_commands.json', 'build', '.git' })
         if root then
             for _, dir in ipairs({ 'build', 'out', 'build/Release', 'build/Debug' }) do
                 if vim.uv.fs_stat(root .. '/' .. dir .. '/compile_commands.json') then
-                    table.insert(args, '--compile-commands-dir=' .. dir)
+                    table.insert(args, '--compile-commands-dir=' .. root .. '/' .. dir)
                     break
                 end
             end
